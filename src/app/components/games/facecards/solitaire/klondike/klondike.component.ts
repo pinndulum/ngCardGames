@@ -1,5 +1,5 @@
 import { CdkDrag, CdkDragDrop, CdkDragStart, CdkDropList } from '@angular/cdk/drag-drop';
-import { Component } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { CardState } from 'src/app/enum';
 import { FaceCardName } from 'src/app/enum/facecards';
 import { FaceCardStyle, ICard } from 'src/app/interfaces';
@@ -10,7 +10,8 @@ import { FaceCards } from 'src/app/models/piles/decks';
 @Component({
   selector: 'app-klondike',
   templateUrl: './klondike.component.html',
-  styleUrls: ['./klondike.component.scss']
+  styleUrls: ['./klondike.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> {
 

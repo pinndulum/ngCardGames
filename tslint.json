@@ -85,7 +85,7 @@
       "attribute",
       [
         "app",
-        "sawletairy"
+        "cardgames"
       ],
       "camelCase"
     ],
@@ -94,7 +94,7 @@
       "element",
       [
         "app",
-        "sawletairy",
+        "cardgames",
         "questionnaire"
       ],
       "kebab-case"

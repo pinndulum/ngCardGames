@@ -6,7 +6,7 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
-  public readonly title = 'Sawletairy';
+  public readonly title = 'JM Card Games';
 
   ngOnInit(): void {
   }

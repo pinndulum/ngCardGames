@@ -1,3 +1,7 @@
+body {
+    background-color: #34A249;
+}
+
 .cdk-drag-preview.tableau-drag-preview {
     display: flex;
     flex-direction: column;
@@ -9,7 +13,6 @@
 
 .gametable {
     height: 96.2vh;
-    background-color: #34A249;
 
     .startbutton {
         margin-left: 11px;
