@@ -98,12 +98,11 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> {
     if (event.previousContainer === event.container) {
       event.item.reset();
     } else {
-      const card: FaceCard = event.item.data;
       const pileid: string = event.container.element.nativeElement.attributes['pile'].value;
-      const piletyp = /[^\d]+/.exec(pileid)[0];
-      const pilendx = /\d+/.exec(pileid)[0];
-      const to_pile = this[piletyp][pilendx];
+      const match = /(?<type>.+)(?<ndx>\d+)/.exec(pileid);
+      const to_pile = this[match.groups.type][match.groups.ndx];
 
+      const card: FaceCard = event.item.data;
       const from_pile = card.getPile();
       const ndx = from_pile.cards.indexOf(card);
       from_pile.move(to_pile, ndx);
