@@ -1,0 +1,13 @@
+{
+    "editor.formatOnPaste": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.tslint": true,
+        "source.organizeImports": true
+    },
+    "editor.formatOnType": true,
+    "telemetry.enableTelemetry": false,
+    "telemetry.enableCrashReporter": false,
+    "git.autofetch": true,
+    "git.confirmSync": false,
+    "typescript.updateImportsOnFileMove.enabled": "always"
+}
