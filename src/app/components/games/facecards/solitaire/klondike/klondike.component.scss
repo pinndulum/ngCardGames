@@ -1,4 +1,5 @@
 body {
+    overscroll-behavior: contain;
     background-color: #34A249;
 }
 
@@ -14,8 +15,13 @@ body {
 .gametable {
     height: 96.2vh;
 
-    .startbutton {
-        margin-left: 11px;
+    .buttons {
+        .startbutton {
+            margin-left: 11px;
+        }
+        .undobutton {
+            margin-left: 5px;
+        }
     }
 
     .facecard {

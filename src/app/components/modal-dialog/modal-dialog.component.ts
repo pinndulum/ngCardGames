@@ -2,7 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 export class DialogModel {
-  public readonly opts: { buttons?: { title: string; action?: string }[] };
+  public readonly opts: { buttons?: { title: string; action?: string | (() => {}) }[] };
   constructor(public title: string, public message: string) {
   }
 }
@@ -15,7 +15,7 @@ export class DialogModel {
 export class ModalDialogComponent implements OnInit {
   title: string;
   message: string;
-  buttons: { title: string; action?: string }[];
+  buttons: { title: string; action?: string | (() => {}) }[];
 
   constructor(
     private dialog: MatDialogRef<ModalDialogComponent>,
@@ -29,7 +29,7 @@ export class ModalDialogComponent implements OnInit {
     this.buttons = this.data.opts.buttons || [{ title: 'OK' }];
   }
 
-  onPress(action: string): void {
+  onPress(action: string | (() => {})): void {
     this.dialog.close(action);
   }
 }

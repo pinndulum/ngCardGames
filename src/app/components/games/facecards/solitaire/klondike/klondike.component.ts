@@ -1,9 +1,14 @@
 import { CdkDrag, CdkDragDrop, CdkDragStart, CdkDropList } from '@angular/cdk/drag-drop';
+import { flatten } from '@angular/compiler';
 import { Component, ViewEncapsulation } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { switchMap } from 'rxjs/operators';
+import { ModalDialogComponent } from 'src/app/components/modal-dialog/modal-dialog.component';
 import { CardState } from 'src/app/enum';
 import { FaceCardName } from 'src/app/enum/facecards';
-import { FaceCardStyle, ICard } from 'src/app/interfaces';
+import { FaceCardStyle, ICard, IPile } from 'src/app/interfaces';
 import { Card } from 'src/app/models/card';
+import { cardRecord, GameHistory, HistoryData, moveHistory } from 'src/app/models/game.history';
 import { Draw, Foundation, Tableau } from 'src/app/models/piles';
 import { FaceCards } from 'src/app/models/piles/decks';
 
@@ -16,6 +21,7 @@ import { FaceCards } from 'src/app/models/piles/decks';
 export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> {
 
   public deck: FaceCards;
+  public readonly history: GameHistory = { records: [] };
   public readonly draw: Draw<FaceCard> = new Draw();
   public readonly foundations: Foundation<FaceCard>[] = [
     new Foundation(), new Foundation(),
@@ -27,8 +33,95 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> {
   ];
   public readonly dragging: ICard[] = [];
 
+  constructor(private dialog: MatDialog) {
+  }
+
+  private canFoundationDrop = (card: FaceCard, pile: FaceCard[]): boolean => {
+    if (!card) {
+      return false;
+    }
+    const placeon = (pile || []).slice(-1)[0];
+    if (!placeon) {
+      return card.style.name === FaceCardName.Ace;
+    }
+    return card.style.suit === placeon.style.suit && card.style.name === placeon.style.name + 1;
+  }
+
+  private canTableauDrop = (card: FaceCard, pile: FaceCard[]): boolean => {
+    if (!card) {
+      return false;
+    }
+    const placeon = (pile || []).slice(-1)[0];
+    if (!placeon) {
+      return card.style.name === FaceCardName.King;
+    }
+    return card.style.color !== placeon.style.color && card.style.name === placeon.style.name - 1;
+  }
+
+  private moveCard = (card: FaceCard, to_pile: IPile): void => {
+    if (!card || !to_pile) {
+      return;
+    }
+    const from_pile = card.getPile();
+    const ndx = from_pile.cards.indexOf(card);
+    const cards = from_pile.move(to_pile, ndx);
+    const history = moveHistory(from_pile, ...cards);
+    const next = from_pile.cards.slice(-1)[0];
+    if (next && !this.canMove(next)) {
+      history.moves.push(cardRecord(from_pile, next));
+      next.flip();
+    }
+    this.history.records.push(history);
+    this.checkWin();
+  }
+
+  private checkWin = () => {
+    const cards = flatten(this.foundations.map(x => x.cards));
+    const winner = (cards || []).length === 52;
+    if (!winner) {
+      return;
+    }
+    const windlg = this.dialog.open(ModalDialogComponent, {
+      disableClose: true,
+      data: {
+        title: 'You Won!',
+        message: 'Winner, winner... chicken dinner!',
+        opts: {
+          buttons: [
+            { title: 'Ok' },
+            { title: 'New Game', action: this.startGame }
+          ]
+        }
+      }
+    });
+    windlg.afterClosed().pipe(
+      switchMap((x: () => {}) => {
+        const result = typeof x === 'function' ? x() : x;
+        return Promise.resolve(result);
+      })
+    ).toPromise();
+  }
+
+  public undo = () => {
+    const record = this.history.records.splice(-1)[0];
+    for (const move of (record?.moves || [])) {
+      const piles: IPile[] = [this.deck, this.draw, ...this.tableaus, ...this.foundations];
+      for (const pile of piles) {
+        const card = pile.cards.find(x => x.ids.deckId === move.deckId);
+        if (!card) {
+          continue;
+        }
+        card.style.state = move.style.state;
+        if (move.pile !== pile) {
+          pile.move(move.pile, pile.cards.indexOf(card));
+        }
+      }
+    }
+  }
+
   public startGame = (): void => {
     this.deck = new FaceCards();
+    this.history.records.splice(0);
     for (const pile of [this.draw, ...this.tableaus, ...this.foundations]) {
       pile.cards.splice(0);
     }
@@ -47,15 +140,38 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> {
   }
 
   public doDraw = () => {
+    let cards: ICard[];
+    let history: HistoryData[];
     if (this.deck.cards.length) {
-      this.deck.move(this.draw, 0, 3).forEach(x => x.flip());
+      cards = this.deck.move(this.draw, 0, 3);
+      history = cards.map(x => cardRecord(this.deck, x));
     } else {
-      this.draw.move(this.deck, 0).forEach(x => x.flip());
+      cards = this.draw.move(this.deck, 0);
+      history = cards.map(x => cardRecord(this.draw, x));
     }
+    cards.forEach(x => x.flip());
+    this.history.records.push({ moves: history.reverse() });
   }
 
   public canMove = (card: ICard): boolean => {
     return card?.style.state === CardState.Up;
+  }
+
+  public dblClick = (card: FaceCard) => {
+    if (!this.canMove(card)) {
+      return;
+    }
+    for (const pile of [...this.foundations, ...this.tableaus]) {
+      let candrop: (card: ICard, pile: ICard[]) => boolean;
+      if (pile instanceof Foundation) {
+        candrop = this.canFoundationDrop;
+      } else if (pile instanceof Tableau) {
+        candrop = this.canTableauDrop;
+      }
+      if (candrop(card, pile.cards)) {
+        return this.moveCard(card, pile);
+      }
+    }
   }
 
   public canSort = (index: number, drag: CdkDrag<FaceCard>, drop: CdkDropList<FaceCard[]>): boolean => {
@@ -69,21 +185,11 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> {
   }
 
   public foundationDrop = (drag: CdkDrag<FaceCard>, drop: CdkDropList<FaceCard[]>): boolean => {
-    const card = drag.data;
-    const placeon = drop.data.slice(-1)[0];
-    if (!placeon) {
-      return card.style.name === FaceCardName.Ace;
-    }
-    return card.style.suit === placeon.style.suit && card.style.name === placeon.style.name + 1;
+    return this.canFoundationDrop(drag.data, drop.data);
   }
 
   public tableauDrop = (drag: CdkDrag<FaceCard>, drop: CdkDropList<FaceCard[]>): boolean => {
-    const card = drag.data;
-    const placeon = drop.data.slice(-1)[0];
-    if (!placeon) {
-      return card.style.name === FaceCardName.King;
-    }
-    return card.style.color !== placeon.style.color && card.style.name === placeon.style.name - 1;
+    return this.canTableauDrop(drag.data, drop.data);
   }
 
   public onDragStart = (event: CdkDragStart<FaceCard>) => {
@@ -101,14 +207,9 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> {
     } else {
       const pileid: string = event.container.element.nativeElement.attributes['pile'].value;
       const match = /(?<type>.+)(?<ndx>\d+)/.exec(pileid);
-      const to_pile = this[match.groups.type][match.groups.ndx];
-
-      const card: FaceCard = event.item.data;
-      const from_pile = card.getPile();
-      const ndx = from_pile.cards.indexOf(card);
-      from_pile.move(to_pile, ndx);
-      if (!this.canMove(from_pile.cards[from_pile.cards.length - 1])) {
-        from_pile.turn(-1);
+      const pile: IPile = this[match.groups.type][match.groups.ndx];
+      if (pile) {
+        this.moveCard(event.item.data, pile);
       }
     }
   }

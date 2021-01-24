@@ -1,6 +1,9 @@
 <div class="gametable">
     <p>Klondike Solitaire</p>
-    <button class="startbutton" (click)="startGame()">New Game</button>
+    <div class="buttons">
+        <button class="startbutton" (click)="startGame()">New Game</button>
+        <button class="undobutton" [disabled]="history.records.length < 1" (click)="undo()">Undo</button>
+    </div>
     <ng-container *ngIf="deck?.cards" cdkDropListGroup>
         <span class="upper">
             <div class="deck" (click)="doDraw()">
@@ -16,7 +19,7 @@
                 [cdkDropListSortPredicate]="canSort" [cdkDropListEnterPredicate]="noDrop">
                 <img src="assets/cards/back/b1fv.png" style="position: absolute; opacity: .2;" draggable="false">
                 <ng-container *ngFor="let card of draw.cards">
-                    <div class="facecard" cdkDrag [cdkDragData]="card">
+                    <div class="facecard" cdkDrag [cdkDragData]="card" (dblclick)="dblClick(card)">
                         <div class="placeholder" *cdkDragPlaceholder></div>
                         <img [src]="card.imagePath" [title]="card.ids.fullname" draggable="false">
                     </div>
@@ -48,7 +51,7 @@
                     [cdkDropListSortPredicate]="canSort" [cdkDropListEnterPredicate]="tableauDrop">
                     <ng-container *ngFor="let card of tableaus[i].cards">
                         <div class="facecard" cdkDrag [cdkDragData]="card" [cdkDragDisabled]="!canMove(card)"
-                            (cdkDragStarted)="onDragStart($event)">
+                            (cdkDragStarted)="onDragStart($event)" (dblclick)="dblClick(card)">
                             <div class="tableau-drag-preview" *cdkDragPreview>
                                 <ng-container *ngFor="let drag of dragging">
                                     <img [src]="drag.imagePath" />

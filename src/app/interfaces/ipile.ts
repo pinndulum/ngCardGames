@@ -10,5 +10,5 @@ export interface IPile {
     turn: (start?: number, end?: number) => ICard[];
     add: (card: ICard) => void;
     remove: (card: ICard) => void;
-    move: (topile: IPile, start?: number, count?: number) => ICard[];
+    move: (to_pile: IPile, start?: number, count?: number) => ICard[];
 }

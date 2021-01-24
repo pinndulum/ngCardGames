@@ -4,9 +4,10 @@ import { ICard, IPile } from 'src/app/interfaces';
 export type PileType = 'Hand' | 'Deck' | 'Draw' | 'Tableau' | 'Foundation' | 'Discard';
 
 export class Pile<T extends PileType, U extends ICard> implements IPile {
+    public drawFrom: DrawFrom;
+
     public readonly type: T;
     public readonly cards: U[];
-    public readonly drawFrom: DrawFrom;
 
     constructor(cards?: U[], drawFrom?: DrawFrom) {
         this.cards = cards || [];
@@ -45,11 +46,17 @@ export class Pile<T extends PileType, U extends ICard> implements IPile {
         this.cards.remove(card);
     }
 
-    public move = (topile: IPile, start?: number, count?: number): U[] => {
-        start = start || 0;
+    public move = (to_pile: IPile, start?: number, count?: number): U[] => {
+        start = (start || 0) * this.drawFrom;
+        if (this.drawFrom < 1 && start === 0) {
+            start = -(count || 1);
+        }
         count = count || this.cards.length - start;
-        const cards = this.cards.splice(start, count);
-        cards.forEach(x => x.setPile(topile));
+        let cards = this.cards.splice(start, count);
+        if (to_pile.drawFrom !== this.drawFrom) {
+            cards = cards.reverse();
+        }
+        cards.forEach(x => x.setPile(to_pile));
         return cards;
     }
 }

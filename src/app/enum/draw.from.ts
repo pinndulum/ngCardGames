@@ -1,1 +1,1 @@
-export enum DrawFrom { Bottom = 0, Top = 1 }
+export enum DrawFrom { Bottom = 1, Top = -1 }
