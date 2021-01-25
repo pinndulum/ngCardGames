@@ -23,6 +23,17 @@ body {
         .startbutton {
             margin-left: 11px;
         }
+        .slider {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            position: absolute;
+            top: 52px;
+            label {
+                font-size: 8px;
+                margin-bottom: -20px;
+            }
+        }
         .undobutton {
             margin-left: 5px;
         }

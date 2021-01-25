@@ -1,6 +1,6 @@
 import { CdkDrag, CdkDragDrop, CdkDragStart, CdkDropList } from '@angular/cdk/drag-drop';
 import { flatten } from '@angular/compiler';
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { switchMap } from 'rxjs/operators';
 import { ModalDialogComponent } from 'src/app/components/modal-dialog/modal-dialog.component';
@@ -18,8 +18,9 @@ import { FaceCards } from 'src/app/models/piles/decks';
   styleUrls: ['./klondike.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> {
+export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements OnInit {
 
+  public drawCount = 3;
   public deck: FaceCards;
   public readonly history: GameHistory = { records: [] };
   public readonly draw: Draw<FaceCard> = new Draw();
@@ -36,8 +37,12 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> {
   constructor(private dialog: MatDialog) {
   }
 
+  ngOnInit(): void {
+    this.startGame();
+  }
+
   private canFoundationDrop = (card: FaceCard, pile: FaceCard[]): boolean => {
-    if (!card) {
+    if (!card || card !== card.getPile().cards.slice(-1)[0]) {
       return false;
     }
     const placeon = (pile || []).slice(-1)[0];
@@ -87,16 +92,18 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> {
         title: 'You Won!',
         message: 'Winner, winner... chicken dinner!',
         opts: {
-          buttons: [
-            { title: 'Ok' },
-            { title: 'New Game', action: this.startGame }
-          ]
+          buttons: [{ title: 'Ok' }, {
+            title: 'New Game', action: () => {
+              this.history.records.splice(0);
+              this.startGame();
+            }
+          }]
         }
       }
     });
     windlg.afterClosed().pipe(
-      switchMap((x: () => {}) => {
-        const result = typeof x === 'function' ? x() : x;
+      switchMap((diagres: string | (() => {})) => {
+        const result = typeof diagres === 'function' ? diagres() : diagres;
         return Promise.resolve(result);
       })
     ).toPromise();
@@ -119,7 +126,22 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> {
     }
   }
 
-  public startGame = (): void => {
+  public startGame = async (): Promise<void> => {
+    if (this.history.records.length) {
+      const askdlg = this.dialog.open(ModalDialogComponent, {
+        disableClose: true,
+        data: {
+          title: 'Are you sure?',
+          message: 'Are you sure you would like to start a new game?',
+          opts: { buttons: [{ title: 'Yes' }, { title: 'No' }] }
+        }
+      });
+      const result: string = await askdlg.afterClosed().toPromise();
+      if (result === 'No') {
+        return;
+      }
+    }
+
     this.deck = new FaceCards();
     this.history.records.splice(0);
     for (const pile of [this.draw, ...this.tableaus, ...this.foundations]) {
@@ -143,7 +165,7 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> {
     let cards: ICard[];
     let history: HistoryData[];
     if (this.deck.cards.length) {
-      cards = this.deck.move(this.draw, 0, 3);
+      cards = this.deck.move(this.draw, 0, this.drawCount);
       history = cards.map(x => cardRecord(this.deck, x));
     } else {
       cards = this.draw.move(this.deck, 0);

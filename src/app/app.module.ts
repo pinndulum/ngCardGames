@@ -3,11 +3,13 @@ import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatExpansionModule } from '@angular/material/expansion';
+import { MatSliderModule } from '@angular/material/slider';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppComponent } from './app.component';
 import { AlertComponent } from './components/alert/alert.component';
+import { FreePlayComponent } from './components/games/facecards/freeplay/freeplay.component';
+import { FreeCellComponent } from './components/games/facecards/solitaire/freecell/freecell.component';
 import { KlondikeComponent } from './components/games/facecards/solitaire/klondike/klondike.component';
 import { SpiderComponent } from './components/games/facecards/solitaire/spider/spider.component';
 import { HomeComponent } from './components/home/home.component';
@@ -25,14 +27,16 @@ import { TimePipe } from './pipes/time.pipe';
     ModalDialogComponent,
     HomeComponent,
     KlondikeComponent,
-    SpiderComponent
+    SpiderComponent,
+    FreeCellComponent,
+    FreePlayComponent
   ],
   imports: [
     DragDropModule,
     HttpClientModule,
     MatButtonModule,
     MatDialogModule,
-    MatExpansionModule,
+    MatSliderModule,
     BrowserModule,
     BrowserAnimationsModule,
     AppRoutingModule
