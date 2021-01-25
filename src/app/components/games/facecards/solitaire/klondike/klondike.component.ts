@@ -110,7 +110,7 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
   }
 
   public undo = () => {
-    const record = this.history.records.splice(-1)[0];
+    const record = this.history.records.pop();
     for (const move of (record?.moves || [])) {
       const piles: IPile[] = [this.deck, this.draw, ...this.tableaus, ...this.foundations];
       for (const pile of piles) {
