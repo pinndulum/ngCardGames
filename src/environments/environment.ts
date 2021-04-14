@@ -3,7 +3,13 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  title: 'JM Card Games',
+  appname: 'Angular Card Games',
+  links: {
+    '': [{ name: 'Home', href: '/home' }],
+    'Card Games': [{ name: 'Klondike', href: '/games/solitaire/klondike' }]
+  }
 };
 
 /*

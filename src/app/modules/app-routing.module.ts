@@ -12,8 +12,8 @@ const routes: Routes = [
   { path: 'games/solitaire/freecell', component: FreeCellComponent },
   { path: 'games/freeplay', component: FreePlayComponent },
   { path: 'home', component: HomeComponent },
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: '**', redirectTo: 'home' }
+  { path: '', redirectTo: 'games/solitaire/klondike', pathMatch: 'full' },
+  { path: '**', redirectTo: 'games/solitaire/klondike' }
 ];
 
 @NgModule({

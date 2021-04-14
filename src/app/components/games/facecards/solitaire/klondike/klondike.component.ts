@@ -1,6 +1,6 @@
 import { CdkDrag, CdkDragDrop, CdkDragStart, CdkDropList } from '@angular/cdk/drag-drop';
 import { flatten } from '@angular/compiler';
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { switchMap } from 'rxjs/operators';
 import { ModalDialogComponent } from 'src/app/components/modal-dialog/modal-dialog.component';
@@ -15,8 +15,8 @@ import { FaceCards } from 'src/app/models/piles/decks';
 @Component({
   selector: 'app-klondike',
   templateUrl: './klondike.component.html',
-  styleUrls: ['./klondike.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  styleUrls: ['./klondike.component.scss']
+  // , encapsulation: ViewEncapsulation.None
 })
 export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements OnInit {
 

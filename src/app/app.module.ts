@@ -3,7 +3,11 @@ import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSliderModule } from '@angular/material/slider';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppComponent } from './app.component';
@@ -34,9 +38,13 @@ import { TimePipe } from './pipes/time.pipe';
   imports: [
     DragDropModule,
     HttpClientModule,
+    MatIconModule,
     MatButtonModule,
     MatDialogModule,
+    MatListModule,
     MatSliderModule,
+    MatSidenavModule,
+    MatToolbarModule,
     BrowserModule,
     BrowserAnimationsModule,
     AppRoutingModule

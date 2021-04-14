@@ -1,6 +1,28 @@
 <!-- the application -->
-<div class="main-container">
-  <div class="content-container">
-    <router-outlet id="rootOutlet"></router-outlet>
-  </div>
+<div class="app-container" [class.is-mobile]="isMobile" *ngIf="true">
+  <mat-toolbar color="" class="app-toolbar">
+    <button mat-icon-button (click)="snav.toggle()">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <h1 class="app-name">{{appname}}</h1>
+  </mat-toolbar>
+
+  <mat-sidenav-container class="app-sidenav-container" [style.marginTop.px]="topMargin">
+    <mat-sidenav #snav [mode]="mode" [fixedInViewport]="isMobile" fixedTopGap="56">
+      <mat-nav-list>
+        <ng-container *ngFor="let sec of links | keyvalue">
+          <section *ngIf="sec.key">{{sec.key}}</section>
+          <a mat-list-item *ngFor="let link of sec.value" [routerLink]="link.href">{{link.name}}</a>
+        </ng-container>
+      </mat-nav-list>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      <div class="main-container">
+        <div class="content-container">
+          <router-outlet id="rootOutlet"></router-outlet>
+        </div>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
 </div>

@@ -1,20 +1,28 @@
-body {
-    overscroll-behavior: contain;
-    background-color: #34A249;
-}
+// body {
+//     overscroll-behavior: contain;
+//     .mat-drawer-container {
+//         background-color: #34A249;
+//         color: black;
+//     }
+// }
+
+// :host .mat-drawer-container {
+//     background-color: #34A249;
+//     color: black;
+// }
 
 .cdk-drag-preview.tableau-drag-preview {
     display: flex;
     flex-direction: column;
-
     img:not(:first-child) {
         margin-top: -100%;
     }
 }
 
 .gametable {
-    height: 96.2vh;
-
+    overscroll-behavior: contain;
+    background-color: #34A249;
+    color: black;
     p {
         margin-left: 25px;
     }
@@ -23,6 +31,7 @@ body {
         .startbutton {
             margin-left: 11px;
         }
+
         .slider {
             display: inline-flex;
             flex-direction: column;
@@ -35,6 +44,7 @@ body {
                 margin-bottom: -20px;
             }
         }
+
         .undobutton {
             margin-left: 5px;
         }
@@ -43,21 +53,17 @@ body {
     .facecard {
         min-width: 71px;
         min-height: 96px;
-
         .placeholder {
             clear: both;
         }
     }
-
     .upper {
         display: flex;
-
         .deck {
             min-width: 71px;
             min-height: 96px;
             padding: 5px 9px;
             margin: 2px 2px 5px 2px;
-
             .facecard {
                 position: absolute;
             }
@@ -68,7 +74,6 @@ body {
             min-height: 96px;
             padding: 5px 9px;
             margin: 2px 2px 5px 2px;
-
             .facecard {
                 position: absolute;
             }
@@ -77,13 +82,11 @@ body {
         .foundations {
             margin: 2px 100px;
             display: flex;
-
             .foundation {
                 min-width: 77px;
                 min-height: 102px;
                 margin: 2px;
                 padding: 2px;
-
                 .facecard {
                     position: absolute;
                 }
@@ -94,7 +97,6 @@ body {
     .tableaus {
         margin: 2px 7px;
         display: flex;
-
         .tableau {
             min-width: 77px;
             min-height: 102px;
@@ -102,12 +104,10 @@ body {
             padding: 2px;
             display: flex;
             flex-direction: column;
-
             .cdk-drag-placeholder {
                 visibility: hidden;
                 display: none !important;
             }
-
             .facecard:not(:first-child) {
                 margin-top: -100%;
             }
