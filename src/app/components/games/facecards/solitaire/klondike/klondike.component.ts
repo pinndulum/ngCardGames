@@ -1,7 +1,6 @@
 import { CdkDrag, CdkDragDrop, CdkDragStart, CdkDropList } from '@angular/cdk/drag-drop';
-import { flatten } from '@angular/compiler';
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { switchMap } from 'rxjs/operators';
 import { ModalDialogComponent } from 'src/app/components/modal-dialog/modal-dialog.component';
 import { CardState } from 'src/app/enum';
@@ -11,6 +10,7 @@ import { Card } from 'src/app/models/card';
 import { cardRecord, GameHistory, HistoryData, moveHistory } from 'src/app/models/game.history';
 import { Draw, Foundation, Tableau } from 'src/app/models/piles';
 import { FaceCards } from 'src/app/models/piles/decks';
+import { flatten } from 'src/app/utils/array-helper';
 
 @Component({
   selector: 'app-klondike',
