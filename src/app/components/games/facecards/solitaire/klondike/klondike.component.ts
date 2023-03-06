@@ -1,7 +1,7 @@
 import { CdkDrag, CdkDragDrop, CdkDragStart, CdkDropList } from '@angular/cdk/drag-drop';
 import { flatten } from '@angular/compiler';
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { switchMap } from 'rxjs/operators';
 import { ModalDialogComponent } from 'src/app/components/modal-dialog/modal-dialog.component';
 import { CardState } from 'src/app/enum';
