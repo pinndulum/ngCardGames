@@ -1,7 +1,6 @@
 {
   "name": "ng-card-games",
   "version": "1.0.0",
-  "homepage": "https://pinndulum.github.io/ngCardGames/",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -9,7 +8,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "preghpages": "ng build --base-href 'https://pinndulum.github.io/ngCardGames/'",
+    "preghpages": "ng build --base-href https://pinndulum.github.io/ngCardGames/",
     "ghpages": "npx angular-cli-ghpages --dir=dist/ng-card-games"
   },
   "private": true,
