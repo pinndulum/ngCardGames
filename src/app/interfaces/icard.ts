@@ -14,7 +14,7 @@ export interface ICard {
     style: CardStyle;
     imagePath: string;
     setState: (state: CardState) => void;
-    getPile: () => IPile;
+    getPile: () => IPile | undefined;
     setPile: (pile: IPile) => void;
     flip: () => void;
     toString: () => string;

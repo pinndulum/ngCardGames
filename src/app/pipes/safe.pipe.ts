@@ -19,33 +19,32 @@ export type SafeResult = SafeHtml | SafeStyle | SafeScript | SafeUrl | SafeResou
 
 @Pipe({ name: 'safe' })
 export class SafePipe implements PipeTransform {
+    protected readonly fn: { [key in SafeTransform]: (v: string) => SafeResult; };
 
-    constructor(protected sanitizer: DomSanitizer) {
+    constructor (protected sani: DomSanitizer) {
+        this.fn = {
+            html: this.sani.bypassSecurityTrustHtml,
+            style: this.sani.bypassSecurityTrustStyle,
+            script: this.sani.bypassSecurityTrustScript,
+            url: this.sani.bypassSecurityTrustUrl,
+            resourceUrl: this.sani.bypassSecurityTrustResourceUrl
+        };
     }
 
-    public transform(value: SafeValue, type: SafeTransform): SafeResult {
+    public transform (value: SafeValue, type: SafeTransform = 'url'): SafeResult {
+        type = type ?? 'url';
         if (value instanceof File) {
             value = window.URL.createObjectURL(value);
             type = type === 'url' || type === 'resourceUrl' ? type : 'url';
         }
 
-        if (value && typeof value !== 'string') {
-            throw new Error(`Invalid safe transformation of "${typeof value}" to "${type}"`);
+        if (typeof value !== 'string') {
+            throw Error(`Invalid safe transformation of "${typeof value}" to "${type}"`);
         }
 
-        switch (type) {
-            case 'html':
-                return this.sanitizer.bypassSecurityTrustHtml(value);
-            case 'style':
-                return this.sanitizer.bypassSecurityTrustStyle(value);
-            case 'script':
-                return this.sanitizer.bypassSecurityTrustScript(value);
-            case 'url':
-                return this.sanitizer.bypassSecurityTrustUrl(value);
-            case 'resourceUrl':
-                return this.sanitizer.bypassSecurityTrustResourceUrl(value);
-            default:
-                throw new Error(`Invalid safe type specified: ${type}`);
+        if (!this.fn[type]) {
+            throw Error(`Invalid safe type specified: ${type}`);
         }
+        return this.fn[type](value);
     }
 }

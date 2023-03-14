@@ -2,7 +2,7 @@ import { CardState } from 'src/app/enum';
 import { CardIds, CardStyle, ICard, IPile } from 'src/app/interfaces';
 
 export class Card<T extends CardStyle> implements ICard {
-    private pile: IPile;
+    private pile?: IPile;
 
     constructor(
         public readonly ids: CardIds,
@@ -18,11 +18,11 @@ export class Card<T extends CardStyle> implements ICard {
         this.style.state = state;
     }
 
-    public getPile = (): IPile => {
+    public getPile = <U extends ICard>(): IPile | undefined => {
         return this.pile;
     }
 
-    public setPile = (pile: IPile): void => {
+    public setPile = <U extends ICard>(pile: IPile): void => {
         if (this.pile?.includes(this.ids.deckId)) {
             this.pile.remove(this);
         }
