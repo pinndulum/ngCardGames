@@ -1,4 +1,4 @@
-.section.klondike {
+.klondike .card {
     overscroll-behavior: contain;
     background-color: #34A249;
     padding-top: 10px;
@@ -14,8 +14,6 @@
 }
 
 .gametable {
-    height: 96.2vh;
-
     p {
         margin-left: 25px;
     }
