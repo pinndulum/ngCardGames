@@ -38,8 +38,8 @@ const buildCard = (name: string, deckId: number, backImg?: string): Card<FaceCar
         color: cardcolor,
         state: CardState.Down,
         images: {
-            front: `assets/cards/face/${name}.png`,
-            back: `assets/cards/back/${backImg || Deck.defaultBackImg}.png`
+            front: `assets/img/cards/face/${name}.png`,
+            back: `assets/img/cards/back/${backImg || Deck.defaultBackImg}.png`
         }
     };
     return new Card(ids, style);
@@ -63,6 +63,9 @@ export class FaceCards extends Deck<Card<FaceCardStyle>> {
     }
 
     public removeJoker = (color: FaceCardColor): void => {
-        this.remove(this.find(jokers[color]));
+        const card = this.find(jokers[color]);
+        if (card) {
+            this.remove(card);
+        }
     }
 }

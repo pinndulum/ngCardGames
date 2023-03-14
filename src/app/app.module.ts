@@ -1,50 +1,46 @@
-import { DragDropModule } from '@angular/cdk/drag-drop';
-import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSliderModule } from '@angular/material/slider';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { AlertComponent } from './components/alert/alert.component';
-import { FreePlayComponent } from './components/games/facecards/freeplay/freeplay.component';
-import { FreeCellComponent } from './components/games/facecards/solitaire/freecell/freecell.component';
-import { KlondikeComponent } from './components/games/facecards/solitaire/klondike/klondike.component';
-import { SpiderComponent } from './components/games/facecards/solitaire/spider/spider.component';
-import { HomeComponent } from './components/home/home.component';
-import { ModalDialogComponent } from './components/modal-dialog/modal-dialog.component';
-import { AppRoutingModule } from './modules/app-routing.module';
-import { SafePipe } from './pipes/safe.pipe';
-import { TimePipe } from './pipes/time.pipe';
+import { FreePlayComponent } from './components/pages/games/facecards/freeplay/freeplay.component';
+import { FreeCellComponent } from './components/pages/games/facecards/solitaire/freecell/freecell.component';
+import { KlondikeComponent } from './components/pages/games/facecards/solitaire/klondike/klondike.component';
+import { SpiderComponent } from './components/pages/games/facecards/solitaire/spider/spider.component';
+import { DialogTemplateComponent } from './components/controls/dialog-template/dialog-template.component';
+import { FooterComponent } from './components/layouts/footer/footer.component';
+import { HeaderComponent } from './components/layouts/header/header.component';
+import { SidebarComponent } from './components/layouts/sidebar/sidebar.component';
+import { HomeComponent } from './components/pages/home/home.component';
+import { NgVarDirective } from './directives/ng-var.directive';
+import { MaterialModule } from './modules/material.module';
+import * as pipes from './pipes';
 
 @NgModule({
   declarations: [
-    TimePipe,
-    SafePipe,
     AppComponent,
-    AlertComponent,
-    ModalDialogComponent,
-    HomeComponent,
+    FreePlayComponent,
+    FreeCellComponent,
     KlondikeComponent,
     SpiderComponent,
-    FreeCellComponent,
-    FreePlayComponent
+    DialogTemplateComponent,
+    FooterComponent,
+    HeaderComponent,
+    SidebarComponent,
+    HomeComponent,
+    NgVarDirective,
+    pipes.PrecisionPipe,
+    pipes.ReplacePipe,
+    pipes.SafePipe,
+    pipes.TimePipe
   ],
   imports: [
-    DragDropModule,
-    HttpClientModule,
-    MatButtonModule,
-    MatDialogModule,
-    MatSelectModule,
-    MatSliderModule,
     BrowserModule,
     BrowserAnimationsModule,
-    AppRoutingModule
+    AppRoutingModule,
+    MaterialModule
   ],
-  providers: [
-  ],
-  bootstrap: [AppComponent],
+  providers: [],
+  bootstrap: [AppComponent]
 })
 export class AppModule { }

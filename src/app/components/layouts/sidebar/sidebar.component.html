@@ -1,0 +1,37 @@
+<aside id="sidebar" class="sidebar">
+    <ul class="sidebar-nav" id="sidebar-nav">
+        <li #grp_menu class="nav-item">
+            <a class="nav-link collapsed" data-bs-target="#solitare-nav" data-bs-toggle="collapse" href="#">
+               <i class="bi bi-dot"></i>
+               <span>Solitare</span>
+               <i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="solitare-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" routerLink="/games/solitaire/klondike">
+                        <i class="bi bi-circle"></i>
+                        <span>Klondike</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" routerLink="/games/solitaire/freecell">
+                        <i class="bi bi-circle"></i>
+                        <span>Freecell</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" routerLink="/games/solitaire/spider">
+                        <i class="bi bi-circle"></i>
+                        <span>Spider</span>
+                    </a>
+                </li>        
+            </ul>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" routerLink="/games/freeplay">
+                <i class="bi bi-dot"></i>
+                <span>Free Play</span>
+            </a>
+        </li>
+    </ul>
+</aside>

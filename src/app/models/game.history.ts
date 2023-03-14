@@ -14,5 +14,7 @@ export interface GameHistory {
     records: MoveHistory[];
 }
 
-export const cardRecord = (pile: IPile, card: ICard): HistoryData => ({ deckId: card.ids.deckId, style: { ...card.style }, pile });
-export const moveHistory = (pile: IPile, ...cards: ICard[]): MoveHistory => ({ moves: (cards || []).map(x => cardRecord(pile, x)) });
+export const cardRecord = (pile: IPile, card: ICard): HistoryData => 
+    ({ deckId: card.ids.deckId, style: { ...card.style }, pile });
+export const moveHistory = (pile: IPile, ...cards: ICard[]): MoveHistory => 
+    ({ moves: (cards || []).map(x => cardRecord(pile, x)) });

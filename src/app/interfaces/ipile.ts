@@ -4,7 +4,7 @@ import { ICard } from './icard';
 export interface IPile {
     cards: ICard[];
     drawFrom: DrawFrom;
-    find: (deckId: string | number) => ICard;
+    find: (deckId: string | number) => ICard | undefined;
     findIndex: (deckId: string | number) => number;
     includes: (deckId: string | number) => boolean;
     turn: (start?: number, end?: number) => ICard[];

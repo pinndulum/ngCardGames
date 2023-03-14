@@ -6,7 +6,7 @@ export type PileType = 'Hand' | 'Deck' | 'Draw' | 'Tableau' | 'Foundation' | 'Di
 export class Pile<T extends PileType, U extends ICard> implements IPile {
     public drawFrom: DrawFrom;
 
-    public readonly type: T;
+    public readonly type?: T;
     public readonly cards: U[];
 
     constructor(cards?: U[], drawFrom?: DrawFrom) {
@@ -14,7 +14,7 @@ export class Pile<T extends PileType, U extends ICard> implements IPile {
         this.drawFrom = drawFrom || DrawFrom.Top;
     }
 
-    public find = (deckId: string | number): U => {
+    public find = (deckId: string | number): U | undefined => {
         return this.cards.find(x => x.ids.name === deckId || x.ids.deckId === deckId);
     }
 
@@ -32,18 +32,18 @@ export class Pile<T extends PileType, U extends ICard> implements IPile {
         return cards;
     }
 
-    public add = (card: U): void => {
+    public add = (card: ICard): void => {
         if (!card || this.includes(card.ids.deckId)) {
             return;
         }
-        this.cards.push(card);
+        this.cards.push(card as U);
     }
 
-    public remove = (card: U): void => {
+    public remove = (card: ICard): void => {
         if (!this.includes(card.ids.deckId)) {
             return;
         }
-        this.cards.remove(card);
+        this.cards.remove(card as U);
     }
 
     public move = (to_pile: IPile, start?: number, count?: number): U[] => {

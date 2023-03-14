@@ -9,18 +9,18 @@ export class Guid {
         });
     }
 
-    static matchGuid(candidate: string): RegExpMatchArray {
+    static matchGuid(candidate: string): RegExpMatchArray | null {
         return candidate.match(/[0-9A-F]{8}-(?:[0-9A-F]{4}-){3}[0-9A-F]{12}/gi);
     }
 
-    static getGuid(candidate: string): string {
+    static getGuid(candidate: string): string | null {
         const match = this.matchGuid(candidate);
         return match && match[0];
     }
 
     static isGuid(candidate: string): boolean {
         const guid = this.getGuid(candidate);
-        return guid && candidate === guid;
+        return candidate === guid;
     }
 
     static hasGuid(candidate: string): boolean {
