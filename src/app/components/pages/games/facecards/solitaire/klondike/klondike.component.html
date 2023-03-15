@@ -17,11 +17,12 @@
                         <div class="buttons">
                             <button class="startbutton" (click)="startGame()">New Game</button>
                             <button class="undobutton" [disabled]="history.records.length < 1" (click)="undo()">Undo</button>
-                            <!-- <div class="slider">
-                                <label>Draw Count</label>
-                                <mat-slider aria-label="Draw Count" min="1" max="3" thumbLabel tickInterval="1" [(value)]="drawCount">
+                            <div class="slider">
+                                <label>Draw Count: {{drawCount}}</label>
+                                <mat-slider aria-label="Draw Count" min="1" max="3" thumbLabel tickInterval="1">
+                                    <input matSliderThumb [(value)]="drawCount">
                                 </mat-slider>
-                            </div> -->
+                            </div>
                         </div>
                         <ng-container *ngIf="deck?.cards" cdkDropListGroup>
                             <span class="upper">
