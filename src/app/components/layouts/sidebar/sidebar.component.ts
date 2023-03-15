@@ -26,7 +26,7 @@ export class SidebarComponent implements OnInit {
 
       const selected = links.find(x => {
         const rlnk = x.getAttribute('routerLink');
-        return rlnk && url.includes(x.getAttribute('routerLink') ?? '')
+        return rlnk && url.includes(rlnk);
       });
       if (selected) {
         selected.classList.add('active');
