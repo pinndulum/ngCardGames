@@ -3,7 +3,7 @@ import { FreePlayComponent } from '../components/pages/games/facecards/freeplay/
 import { FreeCellComponent } from '../components/pages/games/facecards/solitaire/freecell/freecell.component';
 import { KlondikeComponent } from '../components/pages/games/facecards/solitaire/klondike/klondike.component';
 import { SpiderComponent } from '../components/pages/games/facecards/solitaire/spider/spider.component';
-// import { HomeComponent } from '../components/pages/home/home.component';
+import { HomeComponent } from '../components/pages/home/home.component';
 
 export const routes: Routes = [{
         path: 'games/solitaire/klondike', component: KlondikeComponent
@@ -14,8 +14,7 @@ export const routes: Routes = [{
     }, {
         path: 'games/freeplay', component: FreePlayComponent
     }, {
-        path: '', component: KlondikeComponent
-        // path: '', component: HomeComponent
+        path: '', component: HomeComponent
     }, {
         path: '**', redirectTo: ''
     }
