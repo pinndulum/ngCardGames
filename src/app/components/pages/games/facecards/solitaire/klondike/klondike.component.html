@@ -55,7 +55,7 @@
                                             <img src="assets/img/cards/back/b1fv.png" style="position: absolute; opacity: .2;"
                                                 draggable="false">
                                             <ng-container *ngFor="let card of foundations[i].cards">
-                                                <div class="facecard" cdkDrag [cdkDragData]="card">
+                                                <div class="facecard" cdkDrag [cdkDragData]="card" (dblclick)="dblClick(card)">
                                                     <img [src]="card.imagePath" [title]="card.ids.fullname" draggable="false">
                                                 </div>
                                             </ng-container>
