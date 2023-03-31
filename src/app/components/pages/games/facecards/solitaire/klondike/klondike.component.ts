@@ -10,7 +10,7 @@ import { Card } from 'src/app/models/card';
 import { cardRecord, GameHistory, HistoryData, moveHistory } from 'src/app/models/game.history';
 import { Draw, Foundation, Tableau } from 'src/app/models/piles';
 import { FaceCards } from 'src/app/models/piles/decks';
-import { flatten } from 'src/app/utils/array-helper';
+import { flatten } from 'src/app/utils/array';
 
 @Component({
   selector: 'app-klondike',
