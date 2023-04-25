@@ -1,6 +1,7 @@
 import { CdkDrag, CdkDragDrop, CdkDragStart, CdkDropList } from '@angular/cdk/drag-drop';
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { lastValueFrom } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { DialogTemplateComponent } from 'src/app/components/controls/dialog-template/dialog-template.component';
 import { CardState } from 'src/app/enum';
@@ -105,12 +106,12 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
         }
       }
     });
-    windlg.afterClosed().pipe(
+    lastValueFrom(windlg.afterClosed().pipe(
       switchMap((diagres: string | (() => {})) => {
         const result = typeof diagres === 'function' ? diagres() : diagres;
         return Promise.resolve(result);
       })
-    ).toPromise();
+    ));
   }
 
   public undo = () => {
@@ -140,7 +141,7 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
           opts: { buttons: [{ title: 'Yes' }, { title: 'No' }] }
         }
       });
-      const result: string = await askdlg.afterClosed().toPromise();
+      const result: string = await lastValueFrom(askdlg.afterClosed());
       if (result === 'No') {
         return;
       }
