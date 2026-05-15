@@ -9,6 +9,7 @@ import {
 } from '@angular/cdk/drag-drop';
 import { ChangeDetectorRef, Component, inject, NgZone, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute, Router } from '@angular/router';
 import { lastValueFrom, take } from 'rxjs';
 import { DialogAction } from '../../../../../../../assets/dialog.message';
 import { DialogTemplateComponent } from '../../../../../controls/dialog-template/dialog-template.component';
@@ -42,6 +43,8 @@ export class SpiderComponent<FaceCard extends Card<FaceCardStyle>> implements On
   private readonly dialog = inject(MatDialog);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly zone = inject(NgZone);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   public gameSeed = '';
   public deck!: FaceCards;
@@ -58,13 +61,28 @@ export class SpiderComponent<FaceCard extends Card<FaceCardStyle>> implements On
   public readonly dragging: FaceCard[] = [];
 
   ngOnInit(): void {
-    this.startGame();
+    this.startGame(this.routeSeed());
   }
 
   public get gameSeedLabel(): string {
     const match = /^shuffle:(.*):(\d+)$/.exec(this.gameSeed);
     const seed = match?.[1] ?? this.gameSeed;
     return seed.length > 6 ? seed.slice(0, 6) : seed;
+  }
+
+  private routeSeed = (): string | undefined =>
+    this.route.snapshot.queryParamMap.get('seed') || undefined;
+
+  public setSeedQueryParam = (): void => {
+    if (!this.gameSeed) {
+      return;
+    }
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { seed: this.gameSeed },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
   }
 
   public get stockDealsRemaining(): number {

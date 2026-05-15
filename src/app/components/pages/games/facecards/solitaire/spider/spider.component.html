@@ -22,7 +22,10 @@
                 <span><strong>{{stockDealsRemaining}}</strong> Stock</span>
                 <span><strong>{{completedRuns}}</strong> Runs</span>
                 <span><strong>{{openTableauCount}}</strong> Open</span>
-                <span [title]="gameSeed"><strong>{{gameSeedLabel}}</strong> Deal</span>
+                <span class="seed-status" [title]="gameSeed" role="button" tabindex="0"
+                    (click)="setSeedQueryParam()" (keydown.enter)="setSeedQueryParam()" (keydown.space)="setSeedQueryParam()">
+                    <strong>{{gameSeedLabel}}</strong> Deal
+                </span>
             </div>
         </div>
 

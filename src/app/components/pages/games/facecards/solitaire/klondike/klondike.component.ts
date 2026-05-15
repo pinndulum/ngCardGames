@@ -9,6 +9,7 @@ import {
 } from '@angular/cdk/drag-drop';
 import { ChangeDetectorRef, Component, inject, NgZone, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { lastValueFrom, take } from 'rxjs';
 import { DialogAction } from '../../../../../../../assets/dialog.message';
@@ -42,6 +43,8 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
   private readonly dialog = inject(MatDialog);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly zone = inject(NgZone);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   public drawCount = 3;
   public gameSeed = '';
@@ -62,7 +65,7 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
   public readonly dragging: ICard[] = [];
 
   ngOnInit(): void {
-    this.startGame();
+    this.startGame(this.routeSeed());
   }
 
   public get gameSeedLabel(): string {
@@ -73,6 +76,21 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
 
   public get cheatStockCards(): FaceCard[] {
     return (this.deck?.cards.slice().reverse() ?? []) as FaceCard[];
+  }
+
+  private routeSeed = (): string | undefined =>
+    this.route.snapshot.queryParamMap.get('seed') || undefined;
+
+  public setSeedQueryParam = (): void => {
+    if (!this.gameSeed) {
+      return;
+    }
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { seed: this.gameSeed },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
   }
 
   public get cheatCoverCards(): FaceCard[] {
@@ -380,6 +398,7 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
 
   public onCardClick = (event: MouseEvent, card: FaceCard): void => {
     if (!this.cheatMode) {
+      this.dblClick(card);
       return;
     }
     if (this.cheatCoverMode && this.canCheatCover(card)) {
