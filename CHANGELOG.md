@@ -2,6 +2,24 @@
 
 All notable changes to JM Card Games are documented here.
 
+## 1.0.1 - 2026-05-15
+
+### Added
+
+- Added replayable deck shuffle seeds using a dedicated `SeededGuid` utility.
+- Added unit coverage for seeded GUID generation and replayed deck shuffle order.
+
+### Changed
+
+- Kept `Guid.newGuid()` as an always-random GUID generator while moving deterministic GUID behavior into `SeededGuid`.
+- Updated `Deck.shuffle()` to expose a replay token containing the shuffle seed and count.
+
+### Verified
+
+- `npm run build`
+- `npm run lint`
+- `npm run test:ci`
+
 ## 1.0.0 - 2026-05-15
 
 ### Added
