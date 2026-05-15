@@ -2,7 +2,7 @@
 
 JM Card Games is an Angular application for exploring card-game logic, UI layout, and reusable game primitives. The most complete game surface is Klondike Solitaire, with placeholder routes for Freecell, Spider, and Free Play.
 
-Current app version: `1.0.0`
+Current app version: `1.0.2`
 
 ## Tech Stack
 

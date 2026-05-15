@@ -2,6 +2,30 @@
 
 All notable changes to JM Card Games are documented here.
 
+## 1.0.2 - 2026-05-15
+
+### Added
+
+- Added Klondike deal replay from the current shuffle seed.
+- Added Klondike cheat mode with stock/tableau peeking, palming, cover swaps, and undo support.
+
+### Changed
+
+- Replaced the Klondike draw-count slider with a Material slide toggle for Draw 1 and Draw 3.
+- Updated Klondike replay and new-game confirmation flow to restart immediately after confirming.
+- Improved Klondike drag/drop placeholders, card reveal timing, and drag animation behavior.
+
+### Fixed
+
+- Fixed initial deck cards not tracking their owning pile, which blocked stock cheat actions.
+- Fixed replay/new-game confirmation requiring a second button click before the deal reset.
+
+### Verified
+
+- `npm run build`
+- `npm run lint`
+- `npm run test:ci`
+
 ## 1.0.1 - 2026-05-15
 
 ### Added
