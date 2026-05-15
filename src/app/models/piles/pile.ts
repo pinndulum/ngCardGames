@@ -12,6 +12,7 @@ export class Pile<T extends PileType, U extends ICard> implements IPile {
     constructor(cards?: U[], drawFrom?: DrawFrom) {
         this.cards = cards || [];
         this.drawFrom = drawFrom || DrawFrom.Top;
+        this.cards.forEach(x => x.setPile(this));
     }
 
     public find = (deckId: string | number): U | undefined => {

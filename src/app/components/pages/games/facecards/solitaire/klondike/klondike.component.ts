@@ -7,10 +7,10 @@ import {
   CdkDropList,
   CdkDropListGroup
 } from '@angular/cdk/drag-drop';
-import { Component, inject, OnInit, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, NgZone, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSliderModule } from '@angular/material/slider';
-import { lastValueFrom } from 'rxjs';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { lastValueFrom, take } from 'rxjs';
 import { DialogAction } from '../../../../../../../assets/dialog.message';
 import { DialogTemplateComponent } from '../../../../../controls/dialog-template/dialog-template.component';
 import { CardState } from '../../../../../../enum';
@@ -35,13 +35,19 @@ type DropPileType = 'foundations' | 'tableaus';
     CdkDragPreview,
     CdkDropList,
     CdkDropListGroup,
-    MatSliderModule
+    MatSlideToggleModule
   ]
 })
 export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements OnInit {
   private readonly dialog = inject(MatDialog);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly zone = inject(NgZone);
 
   public drawCount = 3;
+  public gameSeed = '';
+  public cheatMode = false;
+  public cheatCoverMode = false;
+  public cheatSelectedCard?: FaceCard;
   public deck!: FaceCards;
   public readonly history: GameHistory = { records: [] };
   public readonly draw: Draw<FaceCard> = new Draw();
@@ -57,6 +63,31 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
 
   ngOnInit(): void {
     this.startGame();
+  }
+
+  public get gameSeedLabel(): string {
+    const match = /^shuffle:(.*):(\d+)$/.exec(this.gameSeed);
+    const seed = match?.[1] ?? this.gameSeed;
+    return seed.length > 8 ? seed.slice(0, 8) : seed;
+  }
+
+  public get cheatStockCards(): FaceCard[] {
+    return (this.deck?.cards.slice().reverse() ?? []) as FaceCard[];
+  }
+
+  public get cheatCoverCards(): FaceCard[] {
+    const drawCard = this.draw.cards.slice(-1) as FaceCard[];
+    const tableauCards = flatten(this.tableaus.map(pile => pile.cards)) as FaceCard[];
+    return [...drawCard, ...tableauCards]
+      .filter((card): card is FaceCard => this.canCheatCover(card));
+  }
+
+  public get canPalmCheatCard(): boolean {
+    return !!this.cheatSelectedCard && !this.foundations.some(pile => pile.includes(this.cheatSelectedCard?.ids.deckId ?? ''));
+  }
+
+  public get canCoverCheatCard(): boolean {
+    return !!this.cheatSelectedCard && this.cheatCoverCards.length > 0;
   }
 
   private canFoundationDrop = (card: FaceCard, pile: FaceCard[]): boolean => {
@@ -88,14 +119,18 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
     const from_pile = card.getPile();
     if (from_pile) {
       const ndx = from_pile.cards.indexOf(card);
+      if (ndx < 0) {
+        return;
+      }
+      const next = ndx > 0 ? from_pile.cards[ndx - 1] : undefined;
+      const moving = from_pile.cards.slice(ndx);
+      const history = moveHistory(from_pile, ...moving);
+      if (next && !this.canMove(next)) {
+        history.moves.push(cardRecord(from_pile, next));
+        next.flip();
+      }
       const cards = from_pile.move(to_pile, ndx);
       if (cards) {
-        const history = moveHistory(from_pile, ...cards);
-        const next = from_pile?.cards.slice(-1)[0];
-        if (next && !this.canMove(next)) {
-          history.moves.push(cardRecord(from_pile, next));
-          next.flip();
-        }
         this.history.records.push(history);
       }
     }
@@ -132,6 +167,11 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
 
   public undo = () => {
     const record = this.history.records.pop();
+    if (record?.undo) {
+      record.undo();
+      this.clearCheatSelection();
+      return;
+    }
     for (const move of (record?.moves || [])) {
       const piles: IPile[] = [this.deck, this.draw, ...this.tableaus, ...this.foundations];
       for (const pile of piles) {
@@ -147,29 +187,44 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
     }
   }
 
-  public startGame = async (): Promise<void> => {
-    if (this.history.records.length) {
-      const askdlg = this.dialog.open<DialogTemplateComponent, unknown, DialogAction>(DialogTemplateComponent, {
-        disableClose: true,
-        data: {
-          title: 'Are you sure?',
-          message: 'Are you sure you would like to start a new game?',
-          opts: { buttons: [{ title: 'Yes' }, { title: 'No' }] }
-        }
-      });
-      const result = await lastValueFrom(askdlg.afterClosed());
-      if (result === 'No') {
+  private isConfirmYes = (result: DialogAction | undefined): boolean =>
+    typeof result === 'string' && result.toLowerCase() === 'yes';
+
+  private askRestart = (seed?: string): void => {
+    const askdlg = this.dialog.open<DialogTemplateComponent, unknown, DialogAction>(DialogTemplateComponent, {
+      disableClose: true,
+      data: {
+        title: 'Are you sure?',
+        message: 'Are you sure you would like to start a new game?',
+        opts: { buttons: [{ title: 'Yes', action: 'yes' }, { title: 'No', action: 'no' }] }
+      }
+    });
+    askdlg.afterClosed().pipe(take(1)).subscribe(result => {
+      if (!this.isConfirmYes(result)) {
         return;
       }
-    }
+      this.zone.run(() => this.dealGame(seed));
+    });
+  }
 
+  private requestGame = (seed?: string): void => {
+    if (this.history.records.length) {
+      this.askRestart(seed);
+      return;
+    }
+    this.dealGame(seed);
+  }
+
+  private dealGame = (seed?: string): void => {
     this.deck = new FaceCards();
     this.history.records.splice(0);
+    this.clearCheatSelection();
     for (const pile of [this.draw, ...this.tableaus, ...this.foundations]) {
       pile.cards.splice(0);
     }
 
-    this.deck.shuffle(3);
+    this.deck.shuffle(seed ? undefined : 3, seed);
+    this.gameSeed = this.deck.shuffleSeed ?? '';
     const tlen = this.tableaus.length;
     for (let cnt = tlen; cnt > 0; cnt--) {
       for (let ndx = tlen - cnt; ndx < tlen; ndx++) {
@@ -180,9 +235,218 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
         }
       }
     }
+    this.cdr.detectChanges();
+  }
+
+  public startGame = (seed?: string): void => {
+    this.requestGame(seed);
+  }
+
+  private placeCard = (card: FaceCard, pile: IPile, index?: number): void => {
+    card.setPile(pile);
+    if (typeof index !== 'number') {
+      return;
+    }
+    const currentIndex = pile.cards.indexOf(card);
+    if (currentIndex < 0) {
+      return;
+    }
+    const safeIndex = Math.min(Math.max(index, 0), pile.cards.length - 1);
+    pile.cards.splice(currentIndex, 1);
+    pile.cards.splice(safeIndex, 0, card);
+  }
+
+  private canCheatCover = (card?: FaceCard): card is FaceCard => {
+    if (!card || card === this.cheatSelectedCard || !this.canMove(card)) {
+      return false;
+    }
+    const pile = card.getPile();
+    const isTopDrawCard = pile === this.draw && pile.cards.slice(-1)[0] === card;
+    const isTableauCard = this.tableaus.some(tableau => tableau === pile && tableau.cards.includes(card));
+    return isTopDrawCard || isTableauCard;
+  }
+
+  private canCheatPeek = (card?: Card<FaceCardStyle>): boolean => {
+    if (!card || this.canMove(card)) {
+      return false;
+    }
+    const pile = card.getPile();
+    return pile === this.deck || this.tableaus.some(tableau => tableau === pile);
+  }
+
+  private clearCheatSelection = (): void => {
+    this.cheatSelectedCard = undefined;
+    this.cheatCoverMode = false;
+  }
+
+  private swapCheatCards = (
+    card: FaceCard,
+    cardPile: IPile,
+    cardIndex: number,
+    cover: FaceCard,
+    coverPile: IPile,
+    coverIndex: number
+  ): void => {
+    if (cardPile === coverPile) {
+      cardPile.cards[cardIndex] = cover;
+      coverPile.cards[coverIndex] = card;
+      return;
+    }
+    this.placeCard(card, coverPile, coverIndex);
+    this.placeCard(cover, cardPile, cardIndex);
+  }
+
+  public replayGame = (): void => {
+    const seed = this.gameSeed;
+    if (!seed) {
+      return;
+    }
+    this.requestGame(seed);
+  }
+
+  public setDrawCount = (count: 1 | 3): void => {
+    this.drawCount = count;
+  }
+
+  public toggleCheatMode = (): void => {
+    this.cheatMode = !this.cheatMode;
+    this.clearCheatSelection();
+  }
+
+  public selectCheatStock = (card: Card<FaceCardStyle>): void => {
+    if (!this.deck.includes(card.ids.deckId) || !this.canCheatPeek(card)) {
+      return;
+    }
+    if (this.cheatSelectedCard === card) {
+      this.clearCheatSelection();
+      return;
+    }
+    this.cheatSelectedCard = card as FaceCard;
+    this.cheatCoverMode = false;
+  }
+
+  public selectCheatCard = (card: FaceCard): void => {
+    if (!this.canCheatPeek(card)) {
+      return;
+    }
+    if (this.cheatSelectedCard === card) {
+      this.clearCheatSelection();
+      return;
+    }
+    this.cheatSelectedCard = card;
+    this.cheatCoverMode = false;
+  }
+
+  public toggleCheatCoverMode = (): void => {
+    if (!this.canCoverCheatCard) {
+      return;
+    }
+    this.cheatCoverMode = !this.cheatCoverMode;
+  }
+
+  public cardImagePath = (card: Card<FaceCardStyle>): string =>
+    this.isCheatPeek(card) ? card.style.images.front : card.imagePath;
+
+  public isCheatPeek = (card?: ICard): boolean =>
+    this.cheatMode && !!card && this.cheatSelectedCard === card;
+
+  public isStockCheatPeek = (card: Card<FaceCardStyle>): boolean =>
+    this.isCheatPeek(card) && card.getPile() === this.deck;
+
+  public isCheatCoverTarget = (card: FaceCard): boolean =>
+    this.cheatMode && this.cheatCoverMode && this.canCheatCover(card);
+
+  public isCheatPeekTarget = (card: FaceCard): boolean =>
+    this.cheatMode && this.canCheatPeek(card);
+
+  public onDeckClick = (): void => {
+    if (!this.cheatMode) {
+      this.doDraw();
+      return;
+    }
+    const card = this.deck.cards.slice(-1)[0] as FaceCard | undefined;
+    if (card) {
+      this.selectCheatStock(card);
+    }
+  }
+
+  public onStockCardClick = (event: MouseEvent, card: Card<FaceCardStyle>): void => {
+    if (!this.cheatMode) {
+      return;
+    }
+    event.stopPropagation();
+    this.selectCheatStock(card);
+  }
+
+  public onCardClick = (event: MouseEvent, card: FaceCard): void => {
+    if (!this.cheatMode) {
+      return;
+    }
+    if (this.cheatCoverMode && this.canCheatCover(card)) {
+      event.stopPropagation();
+      this.cheatSwapWithCover(card);
+      return;
+    }
+    if (this.canCheatPeek(card)) {
+      event.stopPropagation();
+      this.selectCheatCard(card);
+    }
+  }
+
+  public cheatPalmSelected = (): void => {
+    const card = this.cheatSelectedCard;
+    const fromPile = card?.getPile();
+    if (!card || !fromPile || !this.canPalmCheatCard) {
+      return;
+    }
+    const fromIndex = fromPile.cards.indexOf(card);
+    if (fromIndex < 0) {
+      return;
+    }
+    const state = card.style.state;
+    this.history.records.push({
+      moves: [cardRecord(fromPile, card)],
+      undo: () => {
+        this.placeCard(card, fromPile, fromIndex);
+        card.setState(state);
+      }
+    });
+    this.placeCard(card, this.draw);
+    card.setState(CardState.Up);
+    this.clearCheatSelection();
+  }
+
+  public cheatSwapWithCover = (cover: FaceCard): void => {
+    const card = this.cheatSelectedCard;
+    const cardPile = card?.getPile();
+    const coverPile = cover.getPile();
+    if (!card || !cardPile || !coverPile || !this.canCheatCover(cover)) {
+      return;
+    }
+    const cardIndex = cardPile.cards.indexOf(card);
+    const coverIndex = coverPile.cards.indexOf(cover);
+    if (cardIndex < 0 || coverIndex < 0) {
+      return;
+    }
+    const cardState = card.style.state;
+    const coverState = cover.style.state;
+    this.history.records.push({
+      moves: [cardRecord(cardPile, card), cardRecord(coverPile, cover)],
+      undo: () => {
+        this.placeCard(card, cardPile, cardIndex);
+        card.setState(cardState);
+        this.placeCard(cover, coverPile, coverIndex);
+        cover.setState(coverState);
+      }
+    });
+    this.swapCheatCards(card, cardPile, cardIndex, cover, coverPile, coverIndex);
+    card.setState(CardState.Up);
+    cover.setState(CardState.Down);
+    this.clearCheatSelection();
   }
 
   public doDraw = () => {
+    this.clearCheatSelection();
     let cards: ICard[];
     let history: HistoryData[];
     if (this.deck.cards.length) {
@@ -248,7 +512,6 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
   }
 
   public onDrop = (event: CdkDragDrop<FaceCard[]>) => {
-    this.dragging.splice(0);
     if (event.previousContainer === event.container) {
       event.item.reset();
     } else {
@@ -267,6 +530,7 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
         }  
       }
     }
+    this.dragging.splice(0);
   }
 
   private findDropPile(type: DropPileType, ndx: number): IPile | undefined {

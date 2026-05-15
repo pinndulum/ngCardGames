@@ -83,6 +83,14 @@
     border-color: #ffe4a8;
 }
 
+.game-button-cheat.is-active,
+.game-button-cheat-action:not(:disabled),
+.game-button-cheat-action.is-active {
+    background: #fff1c7;
+    border-color: #f5cb62;
+    color: #4a2d10;
+}
+
 .game-status {
     display: flex;
     flex-wrap: wrap;
@@ -111,22 +119,93 @@
 .draw-control {
     align-items: center;
     box-sizing: border-box;
-    display: grid;
-    gap: 0.25rem;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: end;
     justify-self: end;
     padding-inline: 0.4rem;
-    width: min(100%, 15rem);
+    width: min(100%, 10rem);
 }
 
-.draw-control label {
+.draw-control span {
     color: rgba(255, 255, 255, 0.8);
-    font-size: 0.72rem;
-    letter-spacing: 0.04em;
+    font-size: 0.78rem;
+    font-weight: 700;
     margin: 0;
+    text-transform: uppercase;
 }
 
-.draw-control mat-slider {
-    width: 100%;
+.draw-control .mat-mdc-slide-toggle {
+    --mdc-switch-selected-focus-state-layer-color: #f4d58d;
+    --mdc-switch-selected-handle-color: #f4d58d;
+    --mdc-switch-selected-hover-state-layer-color: #f4d58d;
+    --mdc-switch-selected-pressed-state-layer-color: #f4d58d;
+    --mdc-switch-selected-track-color: rgba(244, 213, 141, 0.7);
+    --mdc-switch-unselected-handle-color: #f9fbf8;
+    --mdc-switch-unselected-track-color: rgba(255, 255, 255, 0.32);
+}
+
+.cheat-panel {
+    background:
+        linear-gradient(180deg, rgba(255, 249, 229, 0.98), rgba(255, 239, 191, 0.94));
+    border-bottom: 1px solid rgba(70, 42, 18, 0.18);
+    color: #3f2b18;
+    display: grid;
+    gap: 0.65rem;
+    padding: 0.75rem 1rem;
+}
+
+.cheat-panel-header,
+.cheat-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+}
+
+.cheat-panel-header span {
+    font-size: 0.74rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.cheat-panel-header strong {
+    color: #7f1f20;
+    font-size: 0.9rem;
+}
+
+.cheat-stock {
+    display: flex;
+    gap: 0.35rem;
+    min-width: 0;
+    overflow-x: auto;
+    padding-block: 0.1rem 0.35rem;
+}
+
+.cheat-card {
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    flex: 0 0 auto;
+    padding: 0;
+}
+
+.cheat-card img {
+    border-radius: 4px;
+    display: block;
+    height: clamp(48px, 8vw, 72px);
+    width: clamp(35px, 5.9vw, 53px);
+}
+
+.cheat-card:hover,
+.cheat-card.is-selected {
+    border-color: #b31d24;
+    opacity: 1;
+}
+
+.cheat-empty {
+    color: rgba(63, 43, 24, 0.72);
+    font-size: 0.88rem;
 }
 
 .gametable {
@@ -214,12 +293,11 @@ button.pile:hover {
     touch-action: none;
     transition:
         filter 160ms ease,
-        margin-top 180ms ease,
         transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
     width: var(--card-w);
 }
 
-.facecard:not(.cdk-drag-disabled) {
+.facecard.is-draggable {
     cursor: grab;
 }
 
@@ -257,6 +335,39 @@ button.pile:hover {
     transform: translate(2px, -2px);
 }
 
+.facecard.is-cheat-peek img {
+    outline: 2px solid #f5cb62;
+    outline-offset: -2px;
+}
+
+.facecard.is-cheat-peek-target img {
+    outline: 1px dashed rgba(245, 203, 98, 0.76);
+    outline-offset: -3px;
+}
+
+.facecard.is-cheat-peek-target,
+.facecard.is-cheat-cover-target {
+    cursor: pointer;
+}
+
+.facecard.is-cheat-peek-target:hover img {
+    outline-style: solid;
+}
+
+.facecard.is-cheat-cover-target img {
+    outline: 2px solid #ffffff;
+    outline-offset: -2px;
+}
+
+.facecard.is-cheat-cover-target:hover img {
+    outline-color: #f5cb62;
+}
+
+.deck .facecard.is-stock-cheat-peek {
+    transform: translate(calc(var(--card-w) * 0.34), calc(var(--card-h) * 0.22)) rotate(4deg);
+    z-index: 5;
+}
+
 .draw .facecard:last-child,
 .foundation .facecard:last-child {
     z-index: 2;
@@ -270,15 +381,39 @@ button.pile:hover {
     margin-top: calc(var(--stack-offset) - var(--card-h));
 }
 
-.tableau .facecard:not(.cdk-drag-disabled):hover {
+.tableau .facecard.is-draggable:hover {
     filter: brightness(1.04);
     transform: translateY(-3px);
     z-index: 3;
 }
 
-.tableau .cdk-drag-placeholder {
-    display: none !important;
+.placeholder.cdk-drag-placeholder {
+    display: block;
+    height: var(--card-h);
+    opacity: 0;
     visibility: hidden;
+    width: var(--card-w);
+}
+
+.draw .placeholder.cdk-drag-placeholder,
+.foundation .placeholder.cdk-drag-placeholder {
+    inset: 0;
+    position: absolute;
+}
+
+.tableau .placeholder.cdk-drag-placeholder:not(:first-child) {
+    margin-top: calc(var(--stack-offset) - var(--card-h));
+}
+
+.klondike .cdk-drag-animating {
+    transition: none !important;
+}
+
+.klondike .tableau.cdk-drop-list-dragging .facecard:not(.cdk-drag-placeholder),
+.klondike .foundation.cdk-drop-list-dragging .facecard:not(.cdk-drag-placeholder) {
+    transition:
+        filter 120ms ease,
+        transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 @media (max-width: 767px) {
@@ -314,7 +449,7 @@ button.pile:hover {
     .game-status {
         display: grid;
         gap: 0.35rem;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         justify-content: stretch;
     }
 
@@ -325,8 +460,13 @@ button.pile:hover {
     }
 
     .draw-control {
+        justify-content: space-between;
         justify-self: stretch;
         width: 100%;
+    }
+
+    .cheat-panel {
+        padding: 0.65rem;
     }
 
     .gametable {

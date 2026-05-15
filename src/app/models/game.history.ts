@@ -8,6 +8,7 @@ export interface HistoryData {
 
 export interface MoveHistory {
     moves: HistoryData[];
+    undo?: () => void;
 }
 
 export interface GameHistory {
