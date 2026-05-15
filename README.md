@@ -1,27 +1,101 @@
-# ng-card-games
+# JM Card Games
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.2.1.
+JM Card Games is an Angular application for exploring card-game logic, UI layout, and reusable game primitives. The most complete game surface is Klondike Solitaire, with placeholder routes for Freecell, Spider, and Free Play.
 
-## Development server
+Current app version: `1.0.0`
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## Tech Stack
 
-## Code scaffolding
+- Angular `21`
+- Angular Material and CDK drag/drop
+- Bootstrap, Bootstrap Icons, Boxicons, and Remix Icon assets
+- TypeScript `5.9`
+- ESLint flat config with `angular-eslint`
+- Karma/Jasmine unit tests with Chrome Headless
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Getting Started
 
-## Build
+Install dependencies:
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+```bash
+npm install
+```
 
-## Running unit tests
+Start the local development server:
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+```bash
+npm start
+```
 
-## Running end-to-end tests
+The app normally runs at `http://localhost:4200/`. If that port is busy, Angular will offer another port.
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+## Useful Commands
 
-## Further help
+```bash
+npm run build
+npm run lint
+npm run lint:fix
+npm run test
+npm run test:ci
+npm run watch
+```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+GitHub Pages build/deploy helpers:
+
+```bash
+npm run build:ghpages
+npm run ghpages
+```
+
+`test:ci` runs the suite once in Chrome Headless and is the best quick verification command before opening a PR.
+
+## Project Layout
+
+- `src/app/routing/routes.ts` - lazy route definitions.
+- `src/app/components/layouts/` - header, sidebar, footer, and shared layout state.
+- `src/app/components/pages/home/` - landing/dashboard content.
+- `src/app/components/pages/games/facecards/solitaire/klondike/` - Klondike UI and game interactions.
+- `src/app/models/` - card, deck, game, and history models.
+- `src/app/services/` - app services such as alerts, loading state, and preferences.
+- `src/assets/img/cards/` - card face/back image assets used by the games and Home page.
+- `src/styles.scss` - global visual system and shared responsive styling.
+
+## Development Notes
+
+- The app uses standalone Angular components and lazy route loading.
+- The sidebar is controlled by `SidebarStateService`; on mobile, navigation links and the backdrop close the sidebar.
+- Klondike uses Angular CDK drag/drop for card movement and responsive CSS variables for card sizing.
+- External links should use `target="_blank"` with `rel="noopener"`.
+- Generated serve logs such as `ng-serve.out.log` and `ng-serve.err.log` are ignored by git.
+
+## QA Checklist
+
+Before handing off a change, run:
+
+```bash
+npm run build
+npm run lint
+npm run test:ci
+```
+
+For UI changes, also check:
+
+- Mobile width around `360px` and `390px`.
+- Desktop width around `1440px`.
+- Sidebar open/close behavior on narrow screens.
+- Klondike card fit, drag preview behavior, and reduced-motion handling.
+- Footer back-to-top visibility after scrolling.
+
+## Deployment
+
+The GitHub Pages build uses:
+
+```bash
+npm run build:ghpages
+```
+
+That command builds with `--base-href /ngCardGames/`, matching the expected GitHub Pages route base.
+
+## Contributing
+
+Keep changes scoped and prefer the existing Angular 21, standalone-component, strict-TypeScript patterns. When adjusting game behavior, add or update focused tests around the changed logic.

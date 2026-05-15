@@ -1,0 +1,41 @@
+# Changelog
+
+All notable changes to JM Card Games are documented here.
+
+## 1.0.0 - 2026-05-15
+
+### Added
+
+- Added Angular 21-ready documentation for setup, commands, project layout, QA, and deployment.
+- Added this changelog.
+- Added responsive Home page card/deck artwork using existing card assets.
+- Added Home page content structure with section subheads, a quick-stat strip, and a video caption.
+- Added mobile sidebar close coverage for route links.
+- Added footer back-to-top tests for scroll activation and smooth-scroll behavior.
+
+### Changed
+
+- Upgraded the application to Angular 21 following the updated `ng-randomizer` project pattern.
+- Migrated the app to standalone Angular bootstrap and lazy standalone routes.
+- Updated Angular CLI/build tooling, Angular Material/CDK, TypeScript, ESLint, Karma, and related test tooling.
+- Replaced legacy ESLint configuration with the current flat-config `angular-eslint` setup.
+- Removed deprecated `baseUrl` from `tsconfig.json`.
+- Reworked Klondike styling with responsive card sizing, tighter desktop tableau spacing, lighter table colors, improved mobile fit, drag preview styling, and card movement animation.
+- Polished app shell styling for the header, sidebar, footer, cards, page titles, and mobile spacing.
+- Aligned footer back-to-top behavior with `ng-randomizer` using a scroll listener, signal state, and a real button.
+- Improved mobile Home layout, iframe fit, footer wrapping, and page title stacking.
+- Updated external links to open safely in a new tab where appropriate.
+- Corrected visible spelling and capitalization issues found during the documentation and Home page pass.
+
+### Removed
+
+- Removed obsolete Angular module files and legacy routing/module patterns during the Angular 21 migration.
+- Removed the deprecated `baseUrl` compiler option.
+- Removed generated local serve log files from the workspace.
+
+### Verified
+
+- `npm run build`
+- `npm run lint`
+- `npm run test:ci`
+- Mobile and desktop screenshot checks for Home and Klondike.
