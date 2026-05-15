@@ -1,5 +1,5 @@
-import { CardState } from 'src/app/enum';
-import { CardIds, CardStyle, ICard, IPile } from 'src/app/interfaces';
+import { CardState } from '../enum';
+import { CardIds, CardStyle, ICard, IPile } from '../interfaces';
 
 export class Card<T extends CardStyle> implements ICard {
     private pile?: IPile;
@@ -18,11 +18,11 @@ export class Card<T extends CardStyle> implements ICard {
         this.style.state = state;
     }
 
-    public getPile = <U extends ICard>(): IPile | undefined => {
+    public getPile = (): IPile | undefined => {
         return this.pile;
     }
 
-    public setPile = <U extends ICard>(pile: IPile): void => {
+    public setPile = (pile: IPile): void => {
         if (this.pile?.includes(this.ids.deckId)) {
             this.pile.remove(this);
         }

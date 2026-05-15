@@ -1,28 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { SidebarStateService } from '../sidebar-state.service';
 
 @Component({
     selector: 'app-header',
     templateUrl: './header.component.html',
     styleUrls: ['./header.component.scss'],
+    imports: [RouterLink],
 })
-export class HeaderComponent implements OnInit  {
+export class HeaderComponent {
+  private readonly sidebarState = inject(SidebarStateService);
 
-  constructor (
-  ) {
-  }
+  protected readonly sidebarExpanded = this.sidebarState.expanded;
 
-  ngOnInit (): void {
-    if (sessionStorage.getItem('toggle-sidebar') === 'true') {
-      this.sidebarToggle();
-    }
-  }
+  protected readonly sidebarToggle = (): void => this.sidebarState.toggle();
 
-  sidebarToggle = () => {
-    const classes = window.document.body.classList;
-    classes.toggle('toggle-sidebar');
-    sessionStorage.removeItem('toggle-sidebar');
-    if (classes.contains('toggle-sidebar')) {
-      sessionStorage.setItem('toggle-sidebar', 'true');
-    }
-  };
+  protected readonly closeMobileSidebar = (): void => this.sidebarState.closeOnMobileNavigation();
 }

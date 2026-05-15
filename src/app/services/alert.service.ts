@@ -1,31 +1,29 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogState } from '@angular/material/dialog';
-// import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { lastValueFrom } from 'rxjs';
-import { DialogMessage, DialogModel } from 'src/assets/dialog.message';
+import { DialogAction, DialogMessage, DialogModel } from '../../assets/dialog.message';
 import { DialogTemplateComponent } from '../components/controls/dialog-template/dialog-template.component';
 import { AppConfig } from '../interfaces/app-config.interface';
+
+export { DialogAction, DialogModel, MatDialogState };
 
 export interface AlertMessage {
     type: 'log' | 'warn' | 'error' | 'no-log';
     text: string;
     props?: unknown[];
     action?: string;
-    // config?: MatSnackBarConfig<any>;
+    config?: MatSnackBarConfig<unknown>;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AlertService {
-
-    constructor (
-        private cfg: AppConfig,
-        private dialog: MatDialog,
-        // private snackbar: MatSnackBar
-    ) {
-    }
+    private cfg = inject(AppConfig);
+    private dialog = inject(MatDialog);
+    private snackbar = inject(MatSnackBar);
 
     success = (message: string, log?: boolean, ...props: unknown[]) => {
-        log = log ?? this.cfg.env !== 'production';
+        log ??= this.cfg.env !== 'production';
         const type = log ? 'log' : 'no-log';
         this.showSnack({ type, text: message, props });
     };
@@ -39,14 +37,13 @@ export class AlertService {
     };
 
     showSnack = (msg: AlertMessage) => {
-        // this.snackbar.open(msg.text,
-        //     msg.action ?? 'OK',
-        //     msg.config ?? { duration: 5000 }
-        // );
-        // if (msg.type !== 'no-log') {
-        //     // eslint-disable-next-line no-console
-        //     console[msg.type](`alert: ${msg.text}`, ...(msg.props ?? []));
-        // }
+        this.snackbar.open(msg.text,
+            msg.action ?? 'OK',
+            msg.config ?? { duration: 5000 }
+        );
+        if (msg.type !== 'no-log') {
+            console[msg.type](`alert: ${msg.text}`, ...(msg.props ?? []));
+        }
     };
 
     dialogState = (data: DialogModel): MatDialogState | undefined => {
@@ -54,11 +51,16 @@ export class AlertService {
         return ref?.getState();
     };
 
-    showDialog = async (data: DialogModel, disableClose = true): Promise<string | undefined> => {
+    showDialog = async (data: DialogModel, disableClose = true): Promise<DialogAction | undefined> => {
         const ref = this.dialog.open(DialogTemplateComponent, {
-            data, disableClose
+            data,
+            disableClose,
+            maxHeight: data.opts?.maxHeight ?? '70vh',
+            maxWidth: data.opts?.maxWidth,
+            panelClass: data.opts?.panelClass,
+            width: data.opts?.width
         });
-        return await lastValueFrom<string | undefined>(ref.afterClosed());
+        return await lastValueFrom<DialogAction | undefined>(ref.afterClosed());
     };
 
     dialogMsgState = (key: string): MatDialogState | undefined => {
@@ -66,7 +68,7 @@ export class AlertService {
         return ref?.getState();
     };
 
-    showDialogMsg = async (key: string): Promise<string | undefined> => {
+    showDialogMsg = async (key: string): Promise<DialogAction | undefined> => {
         let result;
         if (DialogMessage[key]) {
             result = await this.showDialog(DialogMessage[key]);

@@ -1,5 +1,5 @@
-import { DrawFrom } from 'src/app/enum';
-import { ICard, IPile } from 'src/app/interfaces';
+import { DrawFrom } from '../../enum';
+import { ICard, IPile } from '../../interfaces';
 
 export type PileType = 'Hand' | 'Deck' | 'Draw' | 'Tableau' | 'Foundation' | 'Discard';
 
@@ -51,7 +51,7 @@ export class Pile<T extends PileType, U extends ICard> implements IPile {
         if (this.drawFrom < 1 && start === 0) {
             start = -(count || 1);
         }
-        count = count || this.cards.length - start;
+        count ||= this.cards.length - start;
         let cards = this.cards.splice(start, count);
         if (to_pile.drawFrom !== this.drawFrom) {
             cards = cards.reverse();

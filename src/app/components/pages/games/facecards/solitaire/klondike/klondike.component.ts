@@ -1,25 +1,45 @@
-import { CdkDrag, CdkDragDrop, CdkDragStart, CdkDropList } from '@angular/cdk/drag-drop';
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import {
+  CdkDrag,
+  CdkDragDrop,
+  CdkDragPlaceholder,
+  CdkDragPreview,
+  CdkDragStart,
+  CdkDropList,
+  CdkDropListGroup
+} from '@angular/cdk/drag-drop';
+import { Component, inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSliderModule } from '@angular/material/slider';
 import { lastValueFrom } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
-import { DialogTemplateComponent } from 'src/app/components/controls/dialog-template/dialog-template.component';
-import { CardState } from 'src/app/enum';
-import { FaceCardName } from 'src/app/enum/facecards';
-import { FaceCardStyle, ICard, IPile } from 'src/app/interfaces';
-import { Card } from 'src/app/models/card';
-import { cardRecord, GameHistory, HistoryData, moveHistory } from 'src/app/models/game.history';
-import { Draw, Foundation, Tableau } from 'src/app/models/piles';
-import { FaceCards } from 'src/app/models/piles/decks';
-import { flatten } from 'src/app/utils/array';
+import { DialogAction } from '../../../../../../../assets/dialog.message';
+import { DialogTemplateComponent } from '../../../../../controls/dialog-template/dialog-template.component';
+import { CardState } from '../../../../../../enum';
+import { FaceCardName } from '../../../../../../enum/facecards';
+import { FaceCardStyle, ICard, IPile } from '../../../../../../interfaces';
+import { Card } from '../../../../../../models/card';
+import { cardRecord, GameHistory, HistoryData, moveHistory } from '../../../../../../models/game.history';
+import { Draw, Foundation, Tableau } from '../../../../../../models/piles';
+import { FaceCards } from '../../../../../../models/piles/decks';
+import { flatten } from '../../../../../../utils/array';
+
+type DropPileType = 'foundations' | 'tableaus';
 
 @Component({
   selector: 'app-klondike',
   templateUrl: './klondike.component.html',
   styleUrls: ['./klondike.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  imports: [
+    CdkDrag,
+    CdkDragPlaceholder,
+    CdkDragPreview,
+    CdkDropList,
+    CdkDropListGroup,
+    MatSliderModule
+  ]
 })
 export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements OnInit {
+  private readonly dialog = inject(MatDialog);
 
   public drawCount = 3;
   public deck!: FaceCards;
@@ -34,9 +54,6 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
     new Tableau(), new Tableau(), new Tableau(), new Tableau()
   ];
   public readonly dragging: ICard[] = [];
-
-  constructor(private dialog: MatDialog) {
-  }
 
   ngOnInit(): void {
     this.startGame();
@@ -91,7 +108,7 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
     if (!winner) {
       return;
     }
-    const windlg = this.dialog.open(DialogTemplateComponent, {
+    const windlg = this.dialog.open<DialogTemplateComponent, unknown, DialogAction>(DialogTemplateComponent, {
       disableClose: true,
       data: {
         title: 'You Won!',
@@ -106,12 +123,11 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
         }
       }
     });
-    lastValueFrom(windlg.afterClosed().pipe(
-      switchMap((diagres: string | (() => {})) => {
-        const result = typeof diagres === 'function' ? diagres() : diagres;
-        return Promise.resolve(result);
-      })
-    ));
+    void lastValueFrom(windlg.afterClosed()).then(result => {
+      if (typeof result === 'function') {
+        result();
+      }
+    });
   }
 
   public undo = () => {
@@ -133,7 +149,7 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
 
   public startGame = async (): Promise<void> => {
     if (this.history.records.length) {
-      const askdlg = this.dialog.open(DialogTemplateComponent, {
+      const askdlg = this.dialog.open<DialogTemplateComponent, unknown, DialogAction>(DialogTemplateComponent, {
         disableClose: true,
         data: {
           title: 'Are you sure?',
@@ -141,7 +157,7 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
           opts: { buttons: [{ title: 'Yes' }, { title: 'No' }] }
         }
       });
-      const result: string = await lastValueFrom(askdlg.afterClosed());
+      const result = await lastValueFrom(askdlg.afterClosed());
       if (result === 'No') {
         return;
       }
@@ -239,16 +255,21 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
       const pileattr = event.container.element.nativeElement.attributes;
       const pileid = pileattr.getNamedItem('pile')?.value;
       if (pileid) {
-        const match = /(?<type>.+)(?<ndx>\d+)/.exec(pileid);
+        const match = /^(?<type>foundations|tableaus)(?<ndx>\d+)$/.exec(pileid);
         const groups = match?.groups ?? {};
         if (groups) {
-          const { type, ndx } = groups;
-          const pile: IPile = (this as any)[type][ndx];
+          const type = groups['type'] as DropPileType | undefined;
+          const ndx = Number(groups['ndx']);
+          const pile = type && Number.isInteger(ndx) ? this.findDropPile(type, ndx) : undefined;
           if (pile) {
             this.moveCard(event.item.data, pile);
           }
         }  
       }
     }
+  }
+
+  private findDropPile(type: DropPileType, ndx: number): IPile | undefined {
+    return type === 'foundations' ? this.foundations[ndx] : this.tableaus[ndx];
   }
 }

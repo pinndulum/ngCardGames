@@ -1,14 +1,26 @@
 <div class="header">
     <h1 mat-dialog-title>{{ title }}</h1>
+    <button type="button" class="btn-close dialog-close" (click)="close()" aria-label="Close"></button>
 </div>
-<div mat-dialog-content *ngIf="message">
-    <p class="dialog-message" [innerHtml]="message | safe: 'html'"></p>
-</div>
-<div mat-dialog-content *ngIf="iframe">
-    <iframe [src]="iframe.src" [title]="iframe.title"></iframe>
-</div>
-<div mat-dialog-actions>
-    <ng-container *ngFor="let button of buttons">
-        <button mat-button (click)="onPress(button)">{{button.title}}</button>
-    </ng-container>
-</div>
+@if (message) {
+    <div mat-dialog-content>
+        <div class="dialog-message" [innerHtml]="message | safe: 'html'"></div>
+    </div>
+}
+@if (image) {
+    <div mat-dialog-content class="dialog-image-content">
+        <img class="dialog-image" [src]="image.src" [alt]="image.alt">
+    </div>
+}
+@if (iframe) {
+    <div mat-dialog-content>
+        <iframe [src]="iframe.src" [title]="iframe.title"></iframe>
+    </div>
+}
+@if (buttons.length) {
+    <div mat-dialog-actions>
+        @for (button of buttons; track button) {
+            <button mat-button type="button" (click)="onPress(button)">{{button.title}}</button>
+        }
+    </div>
+}

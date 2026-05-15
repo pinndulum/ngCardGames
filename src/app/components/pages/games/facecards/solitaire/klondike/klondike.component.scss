@@ -45,6 +45,11 @@
         }
     }
 
+    .pile-watermark {
+        opacity: 0.2;
+        position: absolute;
+    }
+
     .upper {
         display: flex;
 

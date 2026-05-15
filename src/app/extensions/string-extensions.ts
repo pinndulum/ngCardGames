@@ -1,6 +1,6 @@
-/* eslint-disable id-blacklist */
 /* eslint-disable object-shorthand */
 
+declare global {
 interface String {
     /**
      * Returns a string with the first letter of each word capitalized.
@@ -20,6 +20,7 @@ interface String {
     rmNonPrintChars(replaceValue?: string): string;
     uriEncode(): string;
 }
+}
 
 Object.defineProperty(String.prototype, 'titleCase', {
     value: function (this: string, ...acronyms: string[]): string {
@@ -33,7 +34,7 @@ Object.defineProperty(String.prototype, 'titleCase', {
         for (const word of minors) {
             str = str.replace(new RegExp(`\\s${word}\\s`, 'gi'), txt => txt.toLowerCase());
         }
-        acronyms = acronyms ?? [];
+        acronyms ??= [];
         for (const word of acronyms) {
             str = str.replace(new RegExp(`\\b${word}\\b`, 'gi'), word.toUpperCase());
         }
@@ -95,3 +96,5 @@ if (!String.prototype.includes) {
         }
     });
 }
+
+export {};

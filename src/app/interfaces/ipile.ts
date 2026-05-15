@@ -1,4 +1,4 @@
-import { DrawFrom } from 'src/app/enum';
+import { DrawFrom } from '../enum';
 import { ICard } from './icard';
 
 export interface IPile {

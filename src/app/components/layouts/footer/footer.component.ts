@@ -1,15 +1,17 @@
 import { Component } from '@angular/core';
-import dates from 'src/app/utils/dates';
+import { RouterLink } from '@angular/router';
+import dates from '../../../utils/dates';
 
 @Component({
     selector: 'app-footer',
     templateUrl: './footer.component.html',
-    styleUrls: ['./footer.component.scss']
+    styleUrls: ['./footer.component.scss'],
+    imports: [RouterLink]
 })
 export class FooterComponent {
-    public readonly year = dates.current.year();
+    protected readonly year = dates.current.year();
 
-    scrollTop () {
+    protected scrollTop () {
         window.scroll({
             top: 0,
             left: 0,

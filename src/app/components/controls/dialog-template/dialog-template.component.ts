@@ -1,40 +1,56 @@
-import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { DialogModel } from 'src/assets/dialog.message';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { Component, inject } from '@angular/core';
+import { MatButton } from '@angular/material/button';
+import { MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { DialogAction, DialogModel } from '../../../../assets/dialog.message';
+import { SafePipe } from '../../../pipes/safe.pipe';
 
 export interface IFrameSource {
     src: string;
     title: string;
 }
 
+export interface ImageSource {
+    src: string;
+    alt: string;
+}
+
 export interface ButtonAction {
     title: string;
-    action?: string;
+    action?: DialogAction;
 }
 
 @Component({
     selector: 'app-dialog-template',
     templateUrl: './dialog-template.component.html',
-    styleUrls: ['./dialog-template.component.scss']
+    styleUrls: ['./dialog-template.component.scss'],
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatDialogActions, MatButton, SafePipe]
 })
 export class DialogTemplateComponent {
-    title: string;
-    message?: string;
-    iframe?: IFrameSource;
-    buttons: ButtonAction[] = [];
+    private readonly data = inject<DialogModel>(MAT_DIALOG_DATA);
+    private readonly dialogRef = inject<MatDialogRef<DialogTemplateComponent, DialogAction>>(MatDialogRef);
 
-    constructor (
-        @Inject(MAT_DIALOG_DATA) public data: DialogModel,
-        public dialogRef: MatDialogRef<DialogTemplateComponent, string>
-    ) {
+    protected title: string;
+    protected message?: string;
+    protected iframe?: IFrameSource;
+    protected image?: ImageSource;
+    protected buttons: ButtonAction[] = [];
+
+    constructor () {
+        const data = this.data;
         this.title = data.title;
         this.message = data.message;
         this.iframe = data.opts?.iframe;
-        this.buttons = data.opts?.buttons || [{ title: 'OK' }];
+        this.image = data.opts?.image;
+        this.buttons = data.opts?.buttons ?? [{ title: 'OK' }];
     }
 
-    onPress (button: ButtonAction): void {
+    protected onPress (button: ButtonAction): void {
         const action = button?.action || button.title;
         this.dialogRef.close(action);
+    }
+
+    protected close (): void {
+        this.dialogRef.close();
     }
 }

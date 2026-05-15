@@ -1,5 +1,5 @@
-import { ICard } from 'src/app/interfaces';
-import { Guid } from 'src/app/utils/guid';
+import { ICard } from '../../../interfaces';
+import { Guid } from '../../../utils/guid';
 import { Pile } from '..';
 
 export class Deck<T extends ICard> extends Pile<'Deck', T> {

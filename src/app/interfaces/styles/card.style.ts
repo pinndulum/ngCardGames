@@ -1,4 +1,4 @@
-import { CardState } from 'src/app/enum';
+import { CardState } from '../../enum';
 
 export interface CardImages { front: string; back: string; }
 

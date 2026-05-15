@@ -1,4 +1,4 @@
-import { CardState } from 'src/app/enum';
+import { CardState } from '../enum';
 import { IPile } from './ipile';
 import { CardStyle } from './styles/card.style';
 

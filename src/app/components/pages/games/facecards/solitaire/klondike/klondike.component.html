@@ -15,77 +15,78 @@
                 <div class="card-body">
                     <div class="gametable">
                         <div class="buttons">
-                            <button class="startbutton" (click)="startGame()">New Game</button>
-                            <button class="undobutton" [disabled]="history.records.length < 1" (click)="undo()">Undo</button>
+                            <button type="button" class="startbutton" (click)="startGame()">New Game</button>
+                            <button type="button" class="undobutton" [disabled]="history.records.length < 1" (click)="undo()">Undo</button>
                             <div class="slider">
-                                <label>Draw Count: {{drawCount}}</label>
-                                <mat-slider aria-label="Draw Count" min="1" max="3" thumbLabel tickInterval="1">
-                                    <input matSliderThumb [(value)]="drawCount">
+                                <label for="drawCount">Draw Count: {{drawCount}}</label>
+                                <mat-slider aria-label="Draw Count" min="1" max="3" step="1" discrete showTickMarks>
+                                    <input id="drawCount" matSliderThumb [(value)]="drawCount">
                                 </mat-slider>
                             </div>
                         </div>
-                        <ng-container *ngIf="deck?.cards" cdkDropListGroup>
+                        @if (deck.cards) {
+                        <ng-container cdkDropListGroup>
                             <span class="upper">
                                 <div class="deck" (click)="doDraw()">
-                                    <img src="assets/img/cards/back/b1fv.png" style="position: absolute; opacity: .2;" draggable="false">
-                                    <ng-container *ngFor="let card of deck.cards">
+                                    <img class="pile-watermark" src="assets/img/cards/back/b1fv.png" alt="" aria-hidden="true" draggable="false">
+                                    @for (card of deck.cards; track card.ids.deckId) {
                                         <div class="facecard">
-                                            <img [src]="card.imagePath" [title]="card.ids.fullname" draggable="false">
+                                            <img [src]="card.imagePath" [title]="card.ids.fullname" [alt]="card.ids.fullname" draggable="false">
                                         </div>
-                                    </ng-container>
+                                    }
                                 </div>
 
                                 <div class="draw" cdkDropList [cdkDropListData]="draw.cards" cdkDropListSortingDisabled
                                     [cdkDropListSortPredicate]="canSort" [cdkDropListEnterPredicate]="noDrop">
-                                    <img src="assets/img/cards/back/b1fv.png" style="position: absolute; opacity: .2;" draggable="false">
-                                    <ng-container *ngFor="let card of draw.cards">
+                                    <img class="pile-watermark" src="assets/img/cards/back/b1fv.png" alt="" aria-hidden="true" draggable="false">
+                                    @for (card of draw.cards; track card.ids.deckId) {
                                         <div class="facecard" cdkDrag [cdkDragData]="card" (dblclick)="dblClick(card)">
                                             <div class="placeholder" *cdkDragPlaceholder></div>
-                                            <img [src]="card.imagePath" [title]="card.ids.fullname" draggable="false">
+                                            <img [src]="card.imagePath" [title]="card.ids.fullname" [alt]="card.ids.fullname" draggable="false">
                                         </div>
-                                    </ng-container>
+                                    }
                                 </div>
 
                                 <div class="foundations">
-                                    <ng-container *ngFor="let foundation of foundations; let i = index;">
+                                    @for (foundation of foundations; track $index; let i = $index) {
                                         <div class="foundation" [attr.pile]="'foundations' + i" cdkDropList
                                             [cdkDropListData]="foundations[i].cards" (cdkDropListDropped)="onDrop($event)"
                                             cdkDropListSortingDisabled [cdkDropListSortPredicate]="canSort"
                                             [cdkDropListEnterPredicate]="foundationDrop">
-                                            <img src="assets/img/cards/back/b1fv.png" style="position: absolute; opacity: .2;"
-                                                draggable="false">
-                                            <ng-container *ngFor="let card of foundations[i].cards">
+                                            <img class="pile-watermark" src="assets/img/cards/back/b1fv.png" alt="" aria-hidden="true" draggable="false">
+                                            @for (card of foundations[i].cards; track card.ids.deckId) {
                                                 <div class="facecard" cdkDrag [cdkDragData]="card" (dblclick)="dblClick(card)">
-                                                    <img [src]="card.imagePath" [title]="card.ids.fullname" draggable="false">
+                                                    <img [src]="card.imagePath" [title]="card.ids.fullname" [alt]="card.ids.fullname" draggable="false">
                                                 </div>
-                                            </ng-container>
+                                            }
                                         </div>
-                                    </ng-container>
+                                    }
                                 </div>
                             </span>
 
                             <div class="tableaus">
-                                <ng-container *ngFor="let tableau of tableaus; let i = index;">
+                                @for (tableau of tableaus; track $index; let i = $index) {
                                     <div class="tableau" [attr.pile]="'tableaus' + i" cdkDropList [cdkDropListData]="tableaus[i].cards"
                                         (cdkDropListDropped)="onDrop($event)" cdkDropListSortingDisabled
                                         [cdkDropListSortPredicate]="canSort" [cdkDropListEnterPredicate]="tableauDrop">
-                                        <ng-container *ngFor="let card of tableaus[i].cards">
+                                        @for (card of tableaus[i].cards; track card.ids.deckId) {
                                             <div class="facecard" cdkDrag [cdkDragData]="card" [cdkDragDisabled]="!canMove(card)"
                                                 (cdkDragStarted)="onDragStart($event)" (dblclick)="dblClick(card)">
                                                 <div class="tableau-drag-preview" *cdkDragPreview>
-                                                    <ng-container *ngFor="let drag of dragging">
-                                                        <img [src]="drag.imagePath" />
-                                                    </ng-container>
+                                                    @for (drag of dragging; track drag.ids.deckId) {
+                                                        <img [src]="drag.imagePath" [alt]="drag.ids.fullname" />
+                                                    }
                                                 </div>
                                                 <div class="placeholder" *cdkDragPlaceholder></div>
-                                                <img [src]="card.imagePath" [title]="card.ids.fullname" draggable="false"
+                                                <img [src]="card.imagePath" [title]="card.ids.fullname" [alt]="card.ids.fullname" draggable="false"
                                                     [hidden]="dragging.includes(card)">
                                             </div>
-                                        </ng-container>
+                                        }
                                     </div>
-                                </ng-container>
+                                }
                             </div>
                         </ng-container>
+                        }
                     </div>
                 </div>
             </div>

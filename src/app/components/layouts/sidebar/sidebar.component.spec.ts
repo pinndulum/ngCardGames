@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { SidebarComponent } from './sidebar.component';
 
@@ -8,7 +9,8 @@ describe('SidebarComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ SidebarComponent ]
+      imports: [SidebarComponent],
+      providers: [provideRouter([])]
     })
     .compileComponents();
 
@@ -19,5 +21,18 @@ describe('SidebarComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('renders primary card-game links', () => {
+    const links = Array.from(
+      fixture.nativeElement.querySelectorAll('.nav-link') as NodeListOf<HTMLAnchorElement>
+    )
+      .map(link => link.textContent?.trim())
+      .filter(Boolean);
+
+    expect(links).toContain('Klondike');
+    expect(links).toContain('Freecell');
+    expect(links).toContain('Spider');
+    expect(links).toContain('Free Play');
   });
 });

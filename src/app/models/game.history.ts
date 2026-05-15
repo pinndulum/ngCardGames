@@ -1,4 +1,4 @@
-import { CardStyle, ICard, IPile } from 'src/app/interfaces';
+import { CardStyle, ICard, IPile } from '../interfaces';
 
 export interface HistoryData {
     deckId: number;
@@ -14,7 +14,7 @@ export interface GameHistory {
     records: MoveHistory[];
 }
 
-export const cardRecord = (pile: IPile, card: ICard): HistoryData => 
+export const cardRecord = (pile: IPile, card: ICard): HistoryData =>
     ({ deckId: card.ids.deckId, style: { ...card.style }, pile });
-export const moveHistory = (pile: IPile, ...cards: ICard[]): MoveHistory => 
+export const moveHistory = (pile: IPile, ...cards: ICard[]): MoveHistory =>
     ({ moves: (cards || []).map(x => cardRecord(pile, x)) });

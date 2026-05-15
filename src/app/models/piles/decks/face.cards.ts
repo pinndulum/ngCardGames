@@ -1,6 +1,6 @@
-import { CardState } from 'src/app/enum';
-import { FaceCardColor, FaceCardName, FaceCardSuit } from 'src/app/enum/facecards';
-import { CardIds, FaceCardStyle } from 'src/app/interfaces';
+import { CardState } from '../../../enum';
+import { FaceCardColor, FaceCardName, FaceCardSuit } from '../../../enum/facecards';
+import { CardIds, FaceCardStyle } from '../../../interfaces';
 import { Card } from '../../card';
 import { Deck } from './deck';
 
