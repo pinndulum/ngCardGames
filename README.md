@@ -1,8 +1,8 @@
 # JM Card Games
 
-JM Card Games is an Angular application for exploring card-game logic, UI layout, and reusable game primitives. The most complete game surface is Klondike Solitaire, with placeholder routes for Freecell, Spider, and Free Play.
+JM Card Games is an Angular application for exploring card-game logic, UI layout, and reusable game primitives. Klondike, FreeCell, and Spider are implemented as playable solitaire surfaces, with a Free Play route still available as a future sandbox.
 
-Current app version: `1.0.2`
+Current app version: `1.1.0`
 
 ## Tech Stack
 
@@ -54,7 +54,7 @@ npm run ghpages
 - `src/app/routing/routes.ts` - lazy route definitions.
 - `src/app/components/layouts/` - header, sidebar, footer, and shared layout state.
 - `src/app/components/pages/home/` - landing/dashboard content.
-- `src/app/components/pages/games/facecards/solitaire/klondike/` - Klondike UI and game interactions.
+- `src/app/components/pages/games/facecards/solitaire/` - Klondike, FreeCell, and Spider UI and game interactions.
 - `src/app/models/` - card, deck, game, and history models.
 - `src/app/services/` - app services such as alerts, loading state, and preferences.
 - `src/assets/img/cards/` - card face/back image assets used by the games and Home page.
@@ -64,7 +64,7 @@ npm run ghpages
 
 - The app uses standalone Angular components and lazy route loading.
 - The sidebar is controlled by `SidebarStateService`; on mobile, navigation links and the backdrop close the sidebar.
-- Klondike uses Angular CDK drag/drop for card movement and responsive CSS variables for card sizing.
+- Solitaire games use Angular CDK drag/drop, tap-friendly quick movement, seeded deals, and responsive CSS variables for card sizing.
 - External links should use `target="_blank"` with `rel="noopener"`.
 - Generated serve logs such as `ng-serve.out.log` and `ng-serve.err.log` are ignored by git.
 
@@ -83,7 +83,7 @@ For UI changes, also check:
 - Mobile width around `360px` and `390px`.
 - Desktop width around `1440px`.
 - Sidebar open/close behavior on narrow screens.
-- Klondike card fit, drag preview behavior, and reduced-motion handling.
+- Solitaire card fit, drag preview behavior, seeded deal URLs, and reduced-motion handling.
 - Footer back-to-top visibility after scrolling.
 
 ## Deployment

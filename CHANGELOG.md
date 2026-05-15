@@ -2,6 +2,25 @@
 
 All notable changes to JM Card Games are documented here.
 
+## 1.1.0 - 2026-05-15
+
+### Added
+
+- Implemented complete FreeCell Solitaire gameplay with free cells, foundations, legal sequence movement, undo, replay, auto-foundation moves, and mobile-friendly tap movement.
+- Implemented complete Spider Solitaire gameplay with two decks, stock deals, same-suit sequence movement, automatic completed-run collection, undo, replay, and mobile-friendly tap movement.
+- Added `?seed=` URL loading for Klondike, FreeCell, and Spider.
+- Added clickable Deal seed pills that update the current URL with the active shuffle seed for sharing or bookmarking.
+- Added Klondike single-click quick moves using the previous double-click move behavior while preserving drag/drop.
+
+### Changed
+
+- Moved shared Klondike toolbar/status/cheat-panel styles out of the component stylesheet to keep component CSS within Angular budgets.
+
+### Verified
+
+- `npm run build`
+- `npm run lint`
+
 ## 1.0.2 - 2026-05-15
 
 ### Added
