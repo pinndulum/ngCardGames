@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import dates from '../../../utils/dates';
 
@@ -10,6 +10,12 @@ import dates from '../../../utils/dates';
 })
 export class FooterComponent {
     protected readonly year = dates.current.year();
+    protected readonly showBackToTop = signal(false);
+
+    @HostListener('window:scroll')
+    protected onWindowScroll (): void {
+        this.showBackToTop.set(window.scrollY > 100);
+    }
 
     protected scrollTop () {
         window.scroll({

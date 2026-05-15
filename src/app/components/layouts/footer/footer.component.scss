@@ -1,5 +1,21 @@
 footer {
     background-color: #f8f9fa;
+    border-top: 1px solid #dfe8ee;
     color: rgb(9,2,24);
+    margin-top: 1rem;
+    overflow-wrap: anywhere;
     text-align: center;
+}
+
+.credits,
+.copyright {
+    max-width: 100%;
+    padding-inline: 0.75rem;
+    white-space: normal;
+}
+
+.back-to-top {
+    border: 0;
+    border-radius: 50%;
+    box-shadow: 0 0.75rem 1.5rem rgba(31, 62, 70, 0.2);
 }

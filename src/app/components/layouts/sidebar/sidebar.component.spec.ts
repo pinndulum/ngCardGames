@@ -1,16 +1,23 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { SidebarStateService } from '../sidebar-state.service';
 
 import { SidebarComponent } from './sidebar.component';
 
 describe('SidebarComponent', () => {
   let component: SidebarComponent;
   let fixture: ComponentFixture<SidebarComponent>;
+  let sidebarState: jasmine.SpyObj<SidebarStateService>;
 
   beforeEach(async () => {
+    sidebarState = jasmine.createSpyObj<SidebarStateService>('SidebarStateService', ['closeOnMobileNavigation']);
+
     await TestBed.configureTestingModule({
       imports: [SidebarComponent],
-      providers: [provideRouter([])]
+      providers: [
+        provideRouter([]),
+        { provide: SidebarStateService, useValue: sidebarState }
+      ]
     })
     .compileComponents();
 
@@ -34,5 +41,15 @@ describe('SidebarComponent', () => {
     expect(links).toContain('Freecell');
     expect(links).toContain('Spider');
     expect(links).toContain('Free Play');
+  });
+
+  it('delegates mobile sidebar close from each route link', () => {
+    const routeLinks = Array.from(
+      fixture.nativeElement.querySelectorAll('a.nav-link') as NodeListOf<HTMLAnchorElement>
+    );
+
+    routeLinks.forEach(link => link.click());
+
+    expect(sidebarState.closeOnMobileNavigation).toHaveBeenCalledTimes(routeLinks.length);
   });
 });

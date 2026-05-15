@@ -2,6 +2,13 @@
     min-width: 0;
 }
 
+.header {
+    background: rgba(255, 255, 255, 0.94);
+    border-bottom: 1px solid rgba(31, 62, 70, 0.08);
+    box-shadow: 0 0.75rem 1.5rem rgba(31, 62, 70, 0.08);
+    backdrop-filter: blur(10px);
+}
+
 .header .toggle-sidebar-btn {
     align-items: center;
     background: transparent;
@@ -12,6 +19,16 @@
     min-height: 44px;
     min-width: 44px;
     padding: 0 0 0 0.625rem;
+    transition:
+        background-color 160ms ease,
+        color 160ms ease,
+        opacity 160ms ease;
+}
+
+.header .toggle-sidebar-btn:hover {
+    background-color: rgba(47, 125, 104, 0.08);
+    color: #2f7d68;
+    opacity: 1;
 }
 
 .logo .app-logo-title {
@@ -22,6 +39,18 @@
     white-space: nowrap;
 }
 
+.logo .app-logo-title::after {
+    color: #b46c3c;
+    content: "Solitaire";
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    margin-top: 0.18rem;
+    text-transform: uppercase;
+}
+
 @media (max-width: 575px) {
     .header {
         padding-left: 0.5rem;
@@ -29,5 +58,9 @@
 
     .header .toggle-sidebar-btn {
         padding-left: 0.25rem;
+    }
+
+    .logo .app-logo-title {
+        font-size: 1.2rem;
     }
 }

@@ -1,15 +1,32 @@
 .sidebar {
+    background:
+        linear-gradient(180deg, rgba(47, 125, 104, 0.05), transparent 14rem),
+        #ffffff;
+    border-right: 1px solid rgba(31, 62, 70, 0.08);
     max-width: calc(100vw - 1rem);
 }
 
 .sidebar-nav .nav-link {
     align-items: flex-start;
+    border: 1px solid transparent;
+    border-radius: 8px;
     min-height: 44px;
+    transition:
+        background-color 160ms ease,
+        border-color 160ms ease,
+        color 160ms ease,
+        transform 160ms ease;
     width: 100%;
 }
 
 button.nav-link {
     border: 0;
+}
+
+.sidebar-nav .nav-link:hover {
+    border-color: rgba(47, 125, 104, 0.12);
+    opacity: 1;
+    transform: translateX(2px);
 }
 
 .sidebar-nav .nav-link i {
@@ -19,4 +36,10 @@ button.nav-link {
 
 .sidebar-nav .nav-link span {
     overflow-wrap: anywhere;
+}
+
+@media (max-width: 575px) {
+    .sidebar {
+        padding: 14px;
+    }
 }

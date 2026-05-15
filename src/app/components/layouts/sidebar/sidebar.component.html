@@ -1,12 +1,18 @@
 <aside id="sidebar" class="sidebar" aria-label="Primary navigation">
     <ul class="sidebar-nav" id="sidebar-nav">
         <li class="nav-item">
-            <button type="button" class="nav-link collapsed" data-bs-target="#solitare-nav" data-bs-toggle="collapse">
+            <button
+                type="button"
+                class="nav-link collapsed"
+                data-bs-target="#solitaire-nav"
+                data-bs-toggle="collapse"
+                aria-controls="solitaire-nav"
+                aria-expanded="true">
                <i class="bi bi-dot"></i>
-               <span>Solitare</span>
+               <span>Solitaire</span>
                <i class="bi bi-chevron-down ms-auto"></i>
             </button>
-            <ul id="solitare-nav" class="nav-content collapse show" data-bs-parent="#sidebar-nav">
+            <ul id="solitaire-nav" class="nav-content collapse show" data-bs-parent="#sidebar-nav">
                 <li class="nav-item">
                     <a class="nav-link" routerLink="/games/solitaire/klondike" (click)="closeMobileSidebar()">
                         <i class="bi bi-circle"></i>

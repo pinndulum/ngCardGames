@@ -4,7 +4,8 @@
 
 @media (max-width: 1199px) {
     .sidebar-backdrop {
-        background: rgba(1, 41, 112, 0.18);
+        background: rgba(12, 38, 41, 0.28);
+        backdrop-filter: blur(2px);
         border: 0;
         bottom: 0;
         cursor: default;
