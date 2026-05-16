@@ -1,0 +1,144 @@
+<div class="pagetitle">
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">Home</li>
+            <li class="breadcrumb-item">Games</li>
+            <li class="breadcrumb-item active">Dice</li>
+        </ol>
+    </nav>
+    <div class="game-title-row">
+        <h1>Dice Table</h1>
+        <span class="title-meta-pill">{{notation()}}</span>
+        @if (rollSeed) {
+            <button type="button" class="title-seed-pill" [title]="rollSeed" (click)="setSeedQueryParam()">
+                <span>Roll</span>
+                <strong>{{rollSeedLabel}}</strong>
+            </button>
+        }
+    </div>
+</div>
+<section class="section dice">
+    <div class="dice-card">
+        <div class="dice-toolbar">
+            <div class="shake-row">
+                <div class="shake-control" [class.is-active]="shakeEnabled">
+                    <span class="shake-icon" aria-hidden="true">
+                        <i class="bi bi-phone-vibrate"></i>
+                    </span>
+                    <mat-slide-toggle aria-label="Shake to roll" [checked]="shakeEnabled"
+                        (change)="setShakeEnabled($event.checked)" />
+                </div>
+            </div>
+            <div class="preset-row" aria-label="Dice presets">
+                @for (preset of presets; track preset.name) {
+                    <button type="button" class="preset-button" (click)="applyPreset(preset)">
+                        {{preset.name}}
+                    </button>
+                }
+            </div>
+            <div class="dice-actions">
+                <button type="button" class="game-button game-button-primary" [disabled]="!canRoll"
+                    [attr.title]="allCurrentRollsLocked ? 'Unlock a die to roll again' : null" (click)="rollDice()">
+                    <i class="bi bi-dice-6" aria-hidden="true"></i>
+                    <span>Roll</span>
+                </button>
+                <button type="button" class="game-button" (click)="resetDiceSelection()">
+                    <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                    <span>Reset</span>
+                </button>
+                <button type="button" class="game-button" (click)="clearDice()">
+                    <i class="bi bi-x-circle" aria-hidden="true"></i>
+                    <span>Clear</span>
+                </button>
+                <button type="button" class="game-button" [disabled]="!rollSeed || !canRoll" (click)="replayRoll()">
+                    <i class="bi bi-repeat" aria-hidden="true"></i>
+                    <span>Replay</span>
+                </button>
+            </div>
+            <div class="game-status" aria-label="Dice status">
+                <span><strong>{{totalDice}}</strong> Dice</span>
+                <span><strong>{{totalValue}}</strong> Total</span>
+                <span><strong>{{lockedCount}}</strong> Locked</span>
+                <span><strong>{{lastRollSource}}</strong></span>
+            </div>
+        </div>
+
+        <div class="dice-table">
+            <div class="dice-config" aria-label="Dice selection">
+                @for (die of dice; track die.sides) {
+                    <div class="die-config">
+                        <span class="die-name">
+                            <span [class]="dieSymbolClass(die.sides)" aria-hidden="true"></span>
+                            <span>{{die.label}}</span>
+                        </span>
+                        <div class="die-stepper">
+                            <button type="button" [disabled]="die.amount === 0" [attr.aria-label]="'Remove one ' + die.label"
+                                (click)="incrementDie(die.sides, -1)">
+                                <i class="bi bi-dash" aria-hidden="true"></i>
+                            </button>
+                            <input #amountInput type="number" min="0" [max]="die.max" [value]="die.amount"
+                                [attr.aria-label]="die.label + ' amount'" (change)="setAmount(die.sides, amountInput.value)">
+                            <button type="button" [disabled]="die.amount === die.max" [attr.aria-label]="'Add one ' + die.label"
+                                (click)="incrementDie(die.sides, 1)">
+                                <i class="bi bi-plus" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="roll-surface" aria-live="polite">
+                @if (rolls.length > 0) {
+                    <div class="dice-total">
+                        <span>Total</span>
+                        <strong>{{totalValue}}</strong>
+                    </div>
+                    <div class="rolled-dice">
+                        @for (roll of rolls; track roll.id) {
+                            <button type="button" [class]="dieClass(roll)" [class.is-locked]="roll.locked"
+                                [class.lock-unavailable]="!canLockRolls"
+                                [attr.data-sides]="roll.sides" [attr.data-value]="roll.value"
+                                [attr.aria-pressed]="canLockRolls ? roll.locked : null"
+                                [attr.aria-disabled]="!canLockRolls" [attr.aria-label]="dieAriaLabel(roll)"
+                                (click)="toggleLock(roll)">
+                                @if (roll.locked) {
+                                    <span class="die-lock" aria-hidden="true">
+                                        <i class="bi bi-check-lg"></i>
+                                    </span>
+                                }
+                                @if (roll.sides === 6) {
+                                    <span class="pip-grid" aria-hidden="true">
+                                        @for (pip of pipSlots; track pip) {
+                                            <span [class]="pipClass(pip)"></span>
+                                        }
+                                    </span>
+                                } @else {
+                                    <span class="roll-shape" aria-hidden="true"></span>
+                                    <strong>{{roll.value}}</strong>
+                                    <small>{{dieLabel(roll)}}</small>
+                                }
+                            </button>
+                        }
+                    </div>
+                } @else {
+                    <div class="empty-roll">
+                        <i class="bi bi-dice-5" aria-hidden="true"></i>
+                        <span>Choose dice, then roll.</span>
+                    </div>
+                }
+            </div>
+
+            <div class="roll-history" aria-label="Recent rolls">
+                <h2>Recent Rolls</h2>
+                @for (item of history; track $index) {
+                    <div class="history-row">
+                        <span>{{item.label}}</span>
+                        <strong>{{item.total}}</strong>
+                    </div>
+                } @empty {
+                    <div class="history-empty">No rolls yet</div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

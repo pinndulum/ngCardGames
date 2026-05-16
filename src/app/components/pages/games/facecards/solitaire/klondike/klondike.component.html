@@ -6,7 +6,16 @@
             <li class="breadcrumb-item active">Klondike</li>
         </ol>
     </nav>
-    <h1>Klondike Solitaire</h1>
+    <div class="game-title-row">
+        <h1>Klondike Solitaire</h1>
+        @if (gameSeed) {
+            <button type="button" class="title-seed-pill" [title]="gameSeed"
+                (click)="setSeedQueryParam()" (keydown.enter)="setSeedQueryParam()" (keydown.space)="setSeedQueryParam()">
+                <span>Deal</span>
+                <strong>{{gameSeedLabel}}</strong>
+            </button>
+        }
+    </div>
 </div>
 <section class="section klondike">
     <div class="card klondike-card">
@@ -22,10 +31,6 @@
                 <span><strong>{{history.records.length}}</strong> Moves</span>
                 <span><strong>{{deck.cards.length}}</strong> Stock</span>
                 <span><strong>{{draw.cards.length}}</strong> Waste</span>
-                <span class="seed-status" [title]="gameSeed" role="button" tabindex="0"
-                    (click)="setSeedQueryParam()" (keydown.enter)="setSeedQueryParam()" (keydown.space)="setSeedQueryParam()">
-                    <strong>{{gameSeedLabel}}</strong> Deal
-                </span>
             </div>
             <div class="draw-control">
                 <span id="drawMode">Draw {{drawCount}}</span>

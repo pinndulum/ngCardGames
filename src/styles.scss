@@ -267,6 +267,359 @@ body #main {
     font-size: clamp(1.45rem, 2.6vw, 2rem);
     letter-spacing: 0;
     line-height: 1.1;
+    margin: 0;
+}
+
+.game-title-row {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    min-width: 0;
+}
+
+.title-seed-pill,
+.title-meta-pill {
+    align-items: baseline;
+    background: #f7f0d7;
+    border: 1px solid rgba(47, 125, 104, 0.24);
+    border-radius: 999px;
+    box-shadow: 0 0.35rem 0.9rem rgba(31, 62, 70, 0.08);
+    color: #234044;
+    display: inline-flex;
+    font-size: 0.78rem;
+    font-weight: 800;
+    gap: 0.35rem;
+    line-height: 1.1;
+    max-width: min(100%, 18rem);
+    min-height: 2rem;
+    min-width: 0;
+    padding: 0.35rem 0.7rem;
+}
+
+.title-seed-pill {
+    cursor: pointer;
+    justify-content: flex-start;
+}
+
+.title-seed-pill:hover {
+    background: #fff8df;
+    opacity: 1;
+}
+
+.title-seed-pill span,
+.title-meta-pill {
+    text-transform: uppercase;
+}
+
+.title-seed-pill strong {
+    color: #1a6b55;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.game-button {
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 6px;
+    color: #163332;
+    font-weight: 700;
+    min-height: 40px;
+    padding: 0.5rem 0.875rem;
+}
+
+.game-button:hover {
+    background: #ffffff;
+    box-shadow: 0 0.35rem 0.85rem rgba(21, 64, 55, 0.16);
+    opacity: 1;
+    transform: translateY(-1px);
+}
+
+.game-button:disabled {
+    background: rgba(255, 255, 255, 0.48);
+    box-shadow: none;
+    color: rgba(22, 51, 50, 0.68);
+    transform: none;
+}
+
+.game-button-primary,
+.game-button.is-active {
+    background: #efd28a;
+    border-color: #ffe4a8;
+}
+
+.game-status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: end;
+}
+
+.game-status span {
+    align-items: baseline;
+    background: rgba(255, 255, 255, 0.13);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.9);
+    display: inline-flex;
+    font-size: 0.78rem;
+    gap: 0.35rem;
+    min-height: 2rem;
+    padding: 0.25rem 0.65rem;
+}
+
+.game-status strong {
+    color: #ffffff;
+    font-size: 0.95rem;
+}
+
+.tile-symbol,
+.die-symbol,
+.roll-shape {
+    aspect-ratio: 1;
+    display: block;
+    position: relative;
+    width: 100%;
+}
+
+.tile-symbol::before,
+.tile-symbol::after,
+.die-symbol::before,
+.roll-shape::before {
+    content: "";
+    position: absolute;
+}
+
+.mahjong-bamboo .tile-symbol::before {
+    background:
+        linear-gradient(90deg, currentColor 0 22%, transparent 22% 39%, currentColor 39% 61%, transparent 61% 78%, currentColor 78%);
+    border-radius: 2px;
+    inset: 12% 8%;
+}
+
+.mahjong-dots .tile-symbol::before {
+    border: 1px solid currentColor;
+    inset: 9%;
+}
+
+.mahjong-dots .tile-symbol::after {
+    background: currentColor;
+    inset: 34%;
+}
+
+.mahjong-dots .tile-symbol::before,
+.mahjong-dots .tile-symbol::after {
+    border-radius: 50%;
+}
+
+.mahjong-cracks .tile-symbol::before {
+    background: currentColor;
+    clip-path: polygon(50% 0, 92% 28%, 75% 100%, 25% 100%, 8% 28%);
+    inset: 9% 12%;
+}
+
+.mahjong-winds .tile-symbol::before,
+.mahjong-winds .tile-symbol::after {
+    background: currentColor;
+    border-radius: 2px;
+    inset: 44% 8%;
+}
+
+.mahjong-winds .tile-symbol::after {
+    transform: rotate(90deg);
+}
+
+.mahjong-dragons .tile-symbol::before {
+    background: currentColor;
+    clip-path: polygon(50% 4%, 96% 50%, 50% 96%, 4% 50%);
+    inset: 5%;
+}
+
+.mahjong-flowers .tile-symbol::before {
+    background:
+        radial-gradient(circle at 50% 18%, currentColor 0 22%, transparent 24%),
+        radial-gradient(circle at 82% 50%, currentColor 0 22%, transparent 24%),
+        radial-gradient(circle at 50% 82%, currentColor 0 22%, transparent 24%),
+        radial-gradient(circle at 18% 50%, currentColor 0 22%, transparent 24%);
+    inset: 0;
+}
+
+.mahjong .mahjong-long .tile-label {
+    font-size: clamp(0.38rem, 1.45vw, 0.72rem);
+    overflow: visible;
+}
+
+.mahjong .mahjong-long .tile-sublabel {
+    font-size: clamp(0.28rem, 1.05vw, 0.45rem);
+    letter-spacing: 0;
+    overflow: visible;
+}
+
+.mahjong .mahjong-long .tile-face-line {
+    gap: 0;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: clamp(0.45rem, 1.8vw, 0.78rem) min-content;
+}
+
+.mahjong .mahjong-long .tile-symbol {
+    width: clamp(0.45rem, 1.8vw, 0.78rem);
+}
+
+.roll-shape {
+    color: #2f5d91;
+    width: clamp(1rem, 3vw, 1.5rem);
+}
+
+.dice .shake-control {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 6px;
+    color: #163332;
+    display: inline-flex;
+    gap: 0.45rem;
+    min-height: 40px;
+    padding: 0.42rem 0.58rem;
+}
+
+.dice .shake-row {
+    display: none;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: end;
+}
+
+.dice .shake-control.is-active {
+    background: #efd28a;
+    border-color: #ffe4a8;
+}
+
+.dice .shake-icon {
+    display: inline-flex;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.dice .shake-control .mat-mdc-slide-toggle {
+    --mdc-switch-selected-focus-state-layer-color: #efd28a;
+    --mdc-switch-selected-handle-color: #efd28a;
+    --mdc-switch-selected-hover-state-layer-color: #efd28a;
+    --mdc-switch-selected-pressed-state-layer-color: #efd28a;
+    --mdc-switch-selected-track-color: rgba(239, 210, 138, 0.78);
+    --mdc-switch-unselected-handle-color: #f9fbf8;
+    --mdc-switch-unselected-track-color: rgba(31, 51, 50, 0.28);
+}
+
+.die-symbol::before,
+.roll-shape::before {
+    background: currentColor;
+    mask: var(--die-wireframe) center / contain no-repeat;
+    -webkit-mask: var(--die-wireframe) center / contain no-repeat;
+    inset: 8%;
+}
+
+.die-symbol-d2,
+.die-d2 {
+    --die-wireframe: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='black' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='50' cy='50' r='38'/%3E%3Cpath d='M50 12v76M24 50h52'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.die-symbol-d3,
+.die-d3,
+.die-symbol-d4,
+.die-d4 {
+    --die-wireframe: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='black' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M50 8 92 86H8Z'/%3E%3Cpath d='M50 8v78M8 86l42-30 42 30'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.die-symbol-d6 {
+    --die-wireframe: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='black' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M28 20h46l14 14v46H42L28 66Z'/%3E%3Cpath d='M28 20l14 14h46M42 34v46M28 66h46l14 14'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.die-d6 {
+    --die-wireframe: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='black' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 20h60v60H20Z'/%3E%3Cpath d='M20 20l60 60M80 20 20 80'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.die-symbol-d8,
+.die-d8 {
+    --die-wireframe: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='black' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M50 5 90 50 50 95 10 50Z'/%3E%3Cpath d='M50 5v90M10 50h80M50 5 10 50l40 45 40-45Z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.die-symbol-d10,
+.die-d10 {
+    --die-wireframe: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='black' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M50 5 90 34 70 95H30L10 34Z'/%3E%3Cpath d='M50 5v90M10 34h80M30 95 50 58l20 37M10 34l40 24 40-24'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.die-symbol-d12,
+.die-d12 {
+    --die-wireframe: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='black' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M50 5 90 28 90 72 50 95 10 72 10 28Z'/%3E%3Cpath d='M50 24 74 38 74 62 50 76 26 62 26 38Z'/%3E%3Cpath d='M50 5v19M90 28 74 38M90 72 74 62M50 95V76M10 72l16-10M10 28l16 10'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.die-symbol-d20,
+.die-d20,
+.die-symbol-d30,
+.die-d30 {
+    --die-wireframe: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='black' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M50 5 86 18 95 50 86 82 50 95 14 82 5 50 14 18Z'/%3E%3Cpath d='M50 5 50 95M5 50h90M14 18l72 64M86 18 14 82M14 18h72L95 50 86 82H14L5 50Z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.die-symbol-d100,
+.die-d100 {
+    --die-wireframe: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='black' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='50' cy='50' r='40'/%3E%3Cellipse cx='50' cy='50' rx='18' ry='40'/%3E%3Cpath d='M12 50h76M20 30h60M20 70h60'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.dice .die-face:hover {
+    opacity: 1;
+}
+
+.dice .die-face.lock-unavailable {
+    cursor: default;
+}
+
+.dice .die-face.is-locked {
+    box-shadow:
+        0.22rem 0.28rem 0 rgba(75, 61, 36, 0.34),
+        0 0 0 3px rgba(245, 203, 98, 0.84),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.76);
+    filter: brightness(1.05);
+}
+
+.dice .die-lock {
+    align-items: center;
+    background: #f5cb62;
+    border: 1px solid rgba(94, 81, 57, 0.35);
+    border-radius: 999px;
+    color: #2b352e;
+    display: inline-flex;
+    font-size: 0.55rem;
+    height: 1rem;
+    justify-content: center;
+    position: absolute;
+    right: 0.18rem;
+    top: 0.18rem;
+    width: 1rem;
+    z-index: 3;
+}
+
+.mahjong .mahjong-table {
+    place-items: start center;
+}
+
+@media (max-width: 767px) {
+    .dice .shake-control {
+        justify-content: center;
+        min-height: 42px;
+    }
+
+    .mahjong .mahjong-board {
+        padding: 0.25rem;
+    }
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .dice .shake-row {
+        display: flex;
+    }
 }
 
 .breadcrumb {
@@ -512,6 +865,17 @@ body #main {
 
     .pagetitle h1 {
         width: 100%;
+    }
+
+    .game-title-row {
+        justify-content: flex-start;
+        width: 100%;
+    }
+
+    .title-seed-pill,
+    .title-meta-pill {
+        border-radius: 6px;
+        max-width: 100%;
     }
 
     .breadcrumb {
@@ -766,7 +1130,7 @@ body #main {
     .klondike .game-status {
         display: grid;
         gap: 0.35rem;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         justify-content: stretch;
     }
 

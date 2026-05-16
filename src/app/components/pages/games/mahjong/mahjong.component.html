@@ -1,0 +1,85 @@
+<div class="pagetitle">
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">Home</li>
+            <li class="breadcrumb-item">Games</li>
+            <li class="breadcrumb-item active">Mahjong</li>
+        </ol>
+    </nav>
+    <div class="game-title-row">
+        <h1>Mahjong</h1>
+        <span class="title-meta-pill">{{selectedPattern.name}}</span>
+        @if (gameSeed) {
+            <button type="button" class="title-seed-pill" [title]="gameSeed" (click)="setSeedQueryParam()">
+                <span>Shuffle</span>
+                <strong>{{gameSeedLabel}}</strong>
+            </button>
+        }
+    </div>
+</div>
+<section class="section mahjong">
+    <div class="mahjong-card">
+        <div class="mahjong-toolbar">
+            <div class="mahjong-actions">
+                <button type="button" class="game-button game-button-primary" (click)="newGame()">
+                    <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
+                    <span>New Game</span>
+                </button>
+                <button type="button" class="game-button" [disabled]="!gameSeed" (click)="replayGame()">
+                    <i class="bi bi-repeat" aria-hidden="true"></i>
+                    <span>Replay</span>
+                </button>
+                <button type="button" class="game-button" [disabled]="remainingCount < 2" (click)="reshuffleRemaining()">
+                    <i class="bi bi-shuffle" aria-hidden="true"></i>
+                    <span>Shuffle</span>
+                </button>
+                <button type="button" class="game-button" [disabled]="availableMoveCount < 1" (click)="showHint()">
+                    <i class="bi bi-lightbulb" aria-hidden="true"></i>
+                    <span>Hint</span>
+                </button>
+            </div>
+            <label class="mahjong-layout">
+                <span>Pattern</span>
+                <select #layoutSelect [value]="selectedPattern.id" (change)="selectPattern(layoutSelect.value)">
+                    @for (pattern of patterns; track pattern.id) {
+                        <option [value]="pattern.id">{{pattern.name}}</option>
+                    }
+                </select>
+            </label>
+            <div class="game-status" aria-label="Game status">
+                <span><strong>{{moves}}</strong> Moves</span>
+                <span><strong>{{remainingCount}}</strong> Tiles</span>
+                <span><strong>{{freeCount}}</strong> Open</span>
+                <span><strong>{{availableMoveCount}}</strong> Pairs</span>
+            </div>
+        </div>
+
+        <div class="mahjong-message" [class.is-complete]="isComplete">
+            {{message}}
+        </div>
+
+        <div #mahjongTable class="mahjong-table">
+            <div
+                [class]="boardClass"
+                [attr.aria-label]="selectedPattern.name + ' mahjong layout'">
+                @for (tile of visibleTiles; track tile.id) {
+                    <button
+                        type="button"
+                        [class]="tileClass(tile)"
+                        [class.is-free]="isTileFree(tile)"
+                        [class.is-selected]="isSelected(tile)"
+                        [class.is-hinted]="isHinted(tile)"
+                        [disabled]="!isTileFree(tile)"
+                        [attr.aria-label]="tile.face.label + ' ' + tile.face.sublabel"
+                        (click)="selectTile(tile)">
+                        <span class="tile-face-line">
+                            <span class="tile-symbol" aria-hidden="true"></span>
+                            <span class="tile-label">{{tile.face.label}}</span>
+                        </span>
+                        <span class="tile-sublabel">{{tile.face.sublabel}}</span>
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</section>

@@ -17,6 +17,14 @@ export const routes: Routes = [{
         loadComponent: () => import('../components/pages/games/facecards/freeplay/freeplay.component')
             .then(c => c.FreePlayComponent)
     }, {
+        path: 'games/mahjong',
+        loadComponent: () => import('../components/pages/games/mahjong/mahjong.component')
+            .then(c => c.MahjongComponent)
+    }, {
+        path: 'games/dice',
+        loadComponent: () => import('../components/pages/games/dice/dice.component')
+            .then(c => c.DiceComponent)
+    }, {
         path: '',
         loadComponent: () => import('../components/pages/home/home.component')
             .then(c => c.HomeComponent)

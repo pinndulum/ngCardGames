@@ -39,5 +39,32 @@
                 <span>Free Play</span>
             </a>
         </li>
+        <li class="nav-item">
+            <button
+                type="button"
+                class="nav-link collapsed"
+                data-bs-target="#tabletop-nav"
+                data-bs-toggle="collapse"
+                aria-controls="tabletop-nav"
+                aria-expanded="true">
+               <i class="bi bi-dot"></i>
+               <span>Tabletop</span>
+               <i class="bi bi-chevron-down ms-auto"></i>
+            </button>
+            <ul id="tabletop-nav" class="nav-content collapse show" data-bs-parent="#sidebar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" routerLink="/games/mahjong" (click)="closeMobileSidebar()">
+                        <i class="bi bi-circle"></i>
+                        <span>Mahjong</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" routerLink="/games/dice" (click)="closeMobileSidebar()">
+                        <i class="bi bi-circle"></i>
+                        <span>Dice</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
     </ul>
 </aside>

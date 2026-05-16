@@ -5,6 +5,7 @@ import * as dates from './dates';
 import * as file_helper from './file-helper';
 import * as guid from './guid';
 import * as seeded_guid from './seeded-guid';
+import * as seeded_shuffle from './seeded-shuffle';
 
 export default {
     array,
@@ -13,7 +14,8 @@ export default {
     dates,
     file_helper,
     guid,
-    seeded_guid
+    seeded_guid,
+    seeded_shuffle
 };
 
 export {
@@ -23,6 +25,7 @@ export {
     dates,
     file_helper,
     guid,
-    seeded_guid
+    seeded_guid,
+    seeded_shuffle
 };
 

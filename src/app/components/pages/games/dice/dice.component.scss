@@ -1,0 +1,415 @@
+:host {
+    display: block;
+}
+
+.dice {
+    --felt: #1b765d;
+    --panel: #275b61;
+    margin-inline: auto;
+    max-width: 1180px;
+}
+
+.dice-card {
+    background: var(--felt);
+    border: 1px solid rgba(16, 85, 65, 0.24);
+    border-radius: 8px;
+    box-shadow: 0 0.65rem 1.5rem rgba(22, 66, 57, 0.11), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+}
+
+.dice-toolbar {
+    align-items: start;
+    background: var(--panel);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+    color: #f8fcf9;
+    display: grid;
+    gap: 0.55rem;
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0.875rem 1rem;
+}
+
+.dice-actions,
+.preset-row,
+.game-status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: start;
+}
+
+.game-button,
+.preset-button {
+    gap: 0.4rem;
+}
+
+.preset-button {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.24);
+    border-radius: 6px;
+    color: #f8fcf9;
+    font-weight: 700;
+    min-height: 34px;
+    padding: 0.35rem 0.6rem;
+}
+
+.dice-table {
+    background-color: var(--felt);
+    background-image:
+        linear-gradient(45deg, rgba(255, 255, 255, 0.024) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(255, 255, 255, 0.018) 25%, transparent 25%);
+    background-size: 18px 18px;
+    display: grid;
+    gap: 0.65rem;
+    grid-template-columns: minmax(9.5rem, 10.5rem) minmax(0, 1fr) minmax(9rem, 12rem);
+    min-height: min(72vh, 720px);
+    padding: clamp(0.5rem, 1.3vw, 0.9rem);
+    touch-action: pan-y;
+}
+
+.dice-config,
+.roll-history {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 0.5rem;
+}
+
+.dice-config {
+    align-content: start;
+    display: grid;
+    gap: 0.38rem;
+}
+
+.die-config {
+    align-items: center;
+    display: grid;
+    gap: 0.25rem;
+    grid-template-columns: 3.4rem 4.55rem;
+    justify-content: start;
+}
+
+.die-name {
+    align-items: center;
+    background:
+        linear-gradient(145deg, #fffdf2, #d9c99e);
+    border: 1px solid #8d7b57;
+    border-radius: 6px;
+    color: #23353a;
+    display: grid;
+    gap: 0.15rem;
+    grid-template-columns: 0.8rem max-content;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 0.82rem;
+    font-weight: 900;
+    justify-content: start;
+    min-height: 1.95rem;
+    padding: 0.25rem 0.3rem;
+    white-space: nowrap;
+    width: 3.4rem;
+}
+
+.die-stepper {
+    display: grid;
+    grid-template-columns: 1.28rem 1.99rem 1.28rem;
+    justify-self: start;
+    width: 4.55rem;
+}
+
+.die-stepper button,
+.die-stepper input {
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    min-height: 1.95rem;
+}
+
+.die-stepper button {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 0;
+    color: #163332;
+    justify-content: center;
+    padding: 0;
+}
+
+.die-stepper button:first-child {
+    border-radius: 6px 0 0 6px;
+}
+
+.die-stepper button:last-child {
+    border-radius: 0 6px 6px 0;
+}
+
+.die-stepper input {
+    background: #fbf7e8;
+    border-inline: 0;
+    color: #1f3536;
+    font-weight: 900;
+    margin: 0;
+    padding: 0.25rem;
+    text-align: center;
+    width: 100%;
+}
+
+.roll-surface {
+    align-content: center;
+    background:
+        radial-gradient(circle at 50% 28%, rgba(255, 255, 255, 0.12), transparent 34%),
+        rgba(11, 62, 49, 0.22);
+    border: 1px dashed rgba(255, 255, 255, 0.24);
+    border-radius: 8px;
+    display: grid;
+    gap: 1rem;
+    justify-items: center;
+    min-height: 21rem;
+    overflow: hidden;
+    padding: 1rem;
+    touch-action: pan-y;
+}
+
+.dice-total {
+    align-items: baseline;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.9);
+    display: inline-flex;
+    gap: 0.5rem;
+    padding: 0.35rem 0.8rem;
+}
+
+.dice-total strong {
+    color: #ffffff;
+    font-size: 1.4rem;
+}
+
+.rolled-dice {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(0.55rem, 1.4vw, 0.95rem);
+    justify-content: center;
+    max-width: 100%;
+}
+
+.die-face {
+    align-items: center;
+    aspect-ratio: 1;
+    background:
+        linear-gradient(145deg, #fffdf2, #dccb9e);
+    border: 1px solid #8d7b57;
+    border-bottom-color: #5e5139;
+    border-radius: 8px;
+    box-shadow:
+        0.22rem 0.28rem 0 rgba(75, 61, 36, 0.34),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+    color: #21353a;
+    display: grid;
+    font-family: Georgia, "Times New Roman", serif;
+    gap: 0.1rem;
+    grid-template-rows: auto auto auto;
+    height: clamp(3.25rem, 9vw, 5.4rem);
+    justify-items: center;
+    min-width: 0;
+    overflow: hidden;
+    padding: 0.35rem;
+    position: relative;
+}
+
+.die-face strong {
+    color: #9d2729;
+    font-size: clamp(1.2rem, 4vw, 2.1rem);
+    line-height: 1;
+}
+
+.die-face small {
+    color: rgba(35, 53, 58, 0.72);
+    font-size: clamp(0.46rem, 1.5vw, 0.62rem);
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.die-poly {
+    border-radius: 16px 7px 16px 7px;
+}
+
+.die-pips {
+    display: block;
+}
+
+.pip-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    height: 100%;
+    width: 100%;
+}
+
+.pip {
+    align-self: center;
+    background: #1e3437;
+    border-radius: 50%;
+    display: block;
+    height: 42%;
+    justify-self: center;
+    opacity: 0;
+    width: 42%;
+}
+
+.pip-1 {
+    grid-area: 1 / 1;
+}
+
+.pip-2 {
+    grid-area: 1 / 3;
+}
+
+.pip-3 {
+    grid-area: 2 / 1;
+}
+
+.pip-4 {
+    grid-area: 2 / 2;
+}
+
+.pip-5 {
+    grid-area: 2 / 3;
+}
+
+.pip-6 {
+    grid-area: 3 / 1;
+}
+
+.pip-7 {
+    grid-area: 3 / 3;
+}
+
+.die-face[data-value="1"] .pip-4,
+.die-face[data-value="2"] :is(.pip-1, .pip-7),
+.die-face[data-value="3"] :is(.pip-1, .pip-4, .pip-7),
+.die-face[data-value="4"] :is(.pip-1, .pip-2, .pip-6, .pip-7),
+.die-face[data-value="5"] :is(.pip-1, .pip-2, .pip-4, .pip-6, .pip-7),
+.die-face[data-value="6"] :is(.pip-1, .pip-2, .pip-3, .pip-5, .pip-6, .pip-7) {
+    opacity: 1;
+}
+
+.empty-roll {
+    color: rgba(255, 255, 255, 0.82);
+    display: grid;
+    font-weight: 800;
+    gap: 0.5rem;
+    justify-items: center;
+}
+
+.roll-history {
+    align-content: start;
+    color: #f8fcf9;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.roll-history h2 {
+    color: #ffffff;
+    font-size: 0.86rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    margin: 0 0 0.25rem;
+    text-transform: uppercase;
+}
+
+.history-row,
+.history-empty {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.9);
+    padding: 0.45rem 0.55rem;
+}
+
+.history-row {
+    align-items: center;
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.history-row span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 920px) {
+    .dice-table {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .dice-config {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767px) {
+    .dice {
+        margin-inline: 0;
+    }
+
+    .dice-toolbar {
+        gap: 0.5rem;
+        padding: 0.65rem;
+    }
+
+    .dice-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .game-button {
+        justify-content: center;
+        min-height: 42px;
+        padding-inline: 0.45rem;
+    }
+
+    .preset-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .game-status {
+        display: grid;
+        gap: 0.35rem;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        justify-content: stretch;
+    }
+
+    .game-status span {
+        border-radius: 6px;
+        justify-content: center;
+        padding-inline: 0.2rem;
+    }
+
+    .dice-table {
+        gap: 0.55rem;
+        min-height: calc(100svh - 15rem);
+        padding: 0.45rem;
+    }
+
+    .dice-config {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        order: 1;
+    }
+
+    .roll-surface {
+        min-height: 16rem;
+        order: 0;
+        padding: 0.75rem;
+    }
+
+    .die-face {
+        height: clamp(3.7rem, 16vw, 4.35rem);
+        padding: 0.28rem;
+    }
+
+    .roll-history {
+        order: 2;
+    }
+}
