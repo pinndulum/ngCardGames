@@ -2,6 +2,26 @@
 
 All notable changes to JM Card Games are documented here.
 
+## 1.2.0 - 2026-05-16
+
+### Added
+
+- Added Mahjong with multiple layout patterns, seeded replay, matching hints, responsive tile symbols, and touch-friendly horizontal board scrolling.
+- Added Dice Table with configurable dice from `d2` through `d100`, presets, seeded roll replay, roll history, die locking, reset selection, and mobile shake-to-roll support.
+- Added shared seeded shuffle helpers for replayable non-card game setup.
+
+### Changed
+
+- Moved solitaire seed/deck identifiers into the page title area to prevent mobile overflow.
+- Refined Dice toolbar ordering, mobile-only shake toggle visibility, die controls, and roll surface spacing.
+- Improved Mahjong tile sizing, symbols, hint visibility, blocked-tile readability, and mobile board start alignment.
+
+### Verified
+
+- `npm run build`
+- `npm run lint`
+- Mobile and desktop browser visual QA for Dice and Mahjong.
+
 ## 1.1.0 - 2026-05-15
 
 ### Added
