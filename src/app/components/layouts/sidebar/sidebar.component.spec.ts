@@ -40,7 +40,20 @@ describe('SidebarComponent', () => {
     expect(links).toContain('Klondike');
     expect(links).toContain('Freecell');
     expect(links).toContain('Spider');
-    expect(links).toContain('Free Play');
+    expect(links).toContain('Mahjong');
+    expect(links).toContain('Dice');
+    expect(links).not.toContain('Free Play');
+  });
+
+  it('allows nav sections to stay open independently', () => {
+    const collapseSections = Array.from(
+      fixture.nativeElement.querySelectorAll('.nav-content.collapse') as NodeListOf<HTMLElement>
+    );
+
+    expect(collapseSections.length).toBeGreaterThan(1);
+    collapseSections.forEach(section => {
+      expect(section.hasAttribute('data-bs-parent')).toBeFalse();
+    });
   });
 
   it('delegates mobile sidebar close from each route link', () => {
