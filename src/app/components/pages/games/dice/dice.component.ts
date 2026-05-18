@@ -1,7 +1,7 @@
-import { Component, inject, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ActivatedRoute, Router } from '@angular/router';
-import { resolveShuffleSeed, seededShuffle, shuffleSeedLabel } from '../../../../utils/seeded-shuffle';
+import { seededShuffle } from '../../../../utils/seeded-shuffle';
 
 interface DieConfig {
   sides: number;
@@ -20,6 +20,9 @@ interface DieRoll {
   sides: number;
   value: number;
   locked: boolean;
+  rolling: boolean;
+  rollCount: number;
+  rollStep: number;
 }
 
 interface DieFace {
@@ -27,9 +30,18 @@ interface DieFace {
   value: number;
 }
 
-interface RollHistory {
+interface RollHistoryDie {
+  id: number;
   label: string;
+  value: number;
+}
+
+interface RollHistory {
+  id: number;
+  rolledAt: string;
+  timeLabel: string;
   total: number;
+  dice: RollHistoryDie[];
 }
 
 type DeviceMotionPermissionState = 'granted' | 'denied' | 'prompt';
@@ -44,6 +56,7 @@ type DeviceMotionEventConstructor = typeof DeviceMotionEvent & {
   imports: [MatSlideToggleModule]
 })
 export class DiceComponent implements OnDestroy, OnInit {
+  private readonly changeDetector = inject(ChangeDetectorRef);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly zone = inject(NgZone);
@@ -70,25 +83,38 @@ export class DiceComponent implements OnDestroy, OnInit {
   public readonly pipSlots = [1, 2, 3, 4, 5, 6, 7];
   public rolls: DieRoll[] = [];
   public history: RollHistory[] = [];
-  public rollSeed = '';
   public shakeEnabled = false;
   public lastRollSource = 'Ready';
 
-  private lastRollDiceCode = '';
+  private activeRollSource = 'Rolled';
+  private nextHistoryId = 0;
   private nextRollId = 0;
   private lastShakeAt = 0;
+  private rollInProgress = false;
+  private readonly rollTimers = new Map<number, number>();
+  private readonly rollFrameMs = 85;
+  private readonly minRollFrames = 9;
+  private readonly maxRollFrames = 18;
   private readonly shakeThreshold = 30;
   private readonly shakeCooldownMs = 900;
+  private readonly historyTimeFormatter = new Intl.DateTimeFormat(undefined, {
+    timeStyle: 'medium'
+  });
+  private readonly pipsByValue = new Map<number, readonly number[]>([
+    [1, [4]],
+    [2, [1, 7]],
+    [3, [1, 4, 7]],
+    [4, [1, 2, 6, 7]],
+    [5, [1, 2, 4, 6, 7]],
+    [6, [1, 2, 3, 5, 6, 7]]
+  ]);
 
   ngOnInit(): void {
     this.applyDiceCode(this.route.snapshot.queryParamMap.get('dice') ?? undefined);
-    const seed = this.route.snapshot.queryParamMap.get('seed') ?? undefined;
-    if (seed && this.canRoll) {
-      this.rollDice('Replay', seed);
-    }
   }
 
   ngOnDestroy(): void {
+    this.cancelRollingDice();
     this.disableShake();
   }
 
@@ -101,19 +127,23 @@ export class DiceComponent implements OnDestroy, OnInit {
   }
 
   public get canRoll(): boolean {
-    return this.totalDice > 0 && !this.allCurrentRollsLocked;
-  }
-
-  public get rollSeedLabel(): string {
-    return shuffleSeedLabel(this.rollSeed, 8);
+    return this.totalDice > 0 && !this.isRolling && !this.allCurrentRollsLocked;
   }
 
   public get lockedCount(): number {
     return this.rolls.filter(roll => roll.locked).length;
   }
 
+  public get rollingCount(): number {
+    return this.rolls.filter(roll => roll.rolling).length;
+  }
+
+  public get isRolling(): boolean {
+    return this.rollingCount > 0;
+  }
+
   public get canLockRolls(): boolean {
-    return this.totalDice > 1 && this.rolls.length > 1;
+    return !this.isRolling && this.totalDice > 1 && this.rolls.length > 1;
   }
 
   public get allCurrentRollsLocked(): boolean {
@@ -129,6 +159,7 @@ export class DiceComponent implements OnDestroy, OnInit {
   };
 
   public setAmount = (sides: number, amount: string | number): void => {
+    this.cancelRollingDice();
     const die = this.findDie(sides);
     if (!die) {
       return;
@@ -136,31 +167,33 @@ export class DiceComponent implements OnDestroy, OnInit {
     const parsed = Number(amount);
     die.amount = Number.isFinite(parsed) ? Math.min(Math.max(Math.trunc(parsed), 0), die.max) : 0;
     this.syncLocksForSelection();
+    this.updateDiceQueryParam();
   };
 
   public applyPreset = (preset: DicePreset): void => {
+    this.cancelRollingDice();
     this.dice.forEach(die => {
       die.amount = preset.dice[die.sides] ?? 0;
     });
     this.syncLocksForSelection();
     this.lastRollSource = preset.name;
+    this.updateDiceQueryParam();
   };
 
   public resetDiceSelection = (): void => {
+    this.cancelRollingDice();
     this.dice.forEach(die => {
       die.amount = die.sides === 6 ? 1 : 0;
     });
-    this.rolls = [];
-    this.rollSeed = '';
-    this.lastRollDiceCode = '';
+    this.setRolls([]);
     this.lastRollSource = 'Reset';
+    this.updateDiceQueryParam();
   };
 
-  public rollDice = (source = 'Rolled', seed?: string): void => {
+  public rollDice = (source = 'Rolled'): void => {
     if (!this.canRoll) {
       return;
     }
-    const rollSeed = resolveShuffleSeed(seed ? undefined : 3, seed);
     const rolls: DieRoll[] = [];
     const lockedBySide = this.lockedRollsBySide();
     let dieIndex = 0;
@@ -168,49 +201,38 @@ export class DiceComponent implements OnDestroy, OnInit {
       for (let ndx = 0; ndx < die.amount; ndx++) {
         const lockedRoll = lockedBySide.get(die.sides)?.shift();
         if (lockedRoll) {
-          rolls.push(lockedRoll);
+          rolls.push({
+            ...lockedRoll,
+            rolling: false,
+            rollCount: 0,
+            rollStep: 0
+          });
           dieIndex++;
           continue;
         }
-        const dieFaces = this.rollableFaces(die.sides, dieIndex);
-        const value = seededShuffle(dieFaces, face => face.id, undefined, rollSeed).items[0].value;
         rolls.push({
           id: this.nextRollId++,
           sides: die.sides,
-          value,
-          locked: false
+          value: this.randomRollValue(die.sides, dieIndex),
+          locked: false,
+          rolling: true,
+          rollCount: this.randomRollCount(),
+          rollStep: 0
         });
         dieIndex++;
       }
     });
-    this.rolls = rolls;
-    this.rollSeed = rollSeed;
-    this.lastRollDiceCode = this.diceCode();
+    this.setRolls(rolls);
+    this.activeRollSource = source;
     this.lastRollSource = source;
-    this.history = [{
-      label: this.notation(),
-      total: this.totalValue
-    }, ...this.history].slice(0, 6);
-  };
-
-  public replayRoll = (): void => {
-    if (!this.rollSeed) {
+    this.rollInProgress = this.rolls.some(roll => roll.rolling);
+    if (!this.rollInProgress) {
+      this.addHistoryRecord();
       return;
     }
-    this.applyDiceCode(this.lastRollDiceCode);
-    this.rollDice('Replay', this.rollSeed);
-  };
-
-  public setSeedQueryParam = (): void => {
-    if (!this.rollSeed) {
-      return;
-    }
-    void this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { dice: this.lastRollDiceCode || this.diceCode(), seed: this.rollSeed },
-      queryParamsHandling: 'merge',
-      replaceUrl: true
-    });
+    this.rolls
+      .filter(roll => roll.rolling)
+      .forEach(roll => this.scheduleRollTick(roll));
   };
 
   public setShakeEnabled = async (enabled: boolean): Promise<void> => {
@@ -222,25 +244,52 @@ export class DiceComponent implements OnDestroy, OnInit {
   };
 
   public dieClass = (roll: DieRoll): string =>
-    `die-face die-d${roll.sides} ${roll.sides === 6 ? 'die-pips' : 'die-poly'}`;
+    [
+      'die-face',
+      `die-d${roll.sides}`,
+      roll.sides === 6 ? 'die-pips' : 'die-poly',
+      roll.locked ? 'is-locked' : '',
+      roll.rolling ? 'is-rolling' : '',
+      !this.canLockRolls && !roll.rolling ? 'lock-unavailable' : ''
+    ].filter(Boolean).join(' ');
 
   public toggleLock = (roll: DieRoll): void => {
     if (!this.canLockRolls) {
       return;
     }
-    roll.locked = !roll.locked;
-    this.lastRollSource = roll.locked ? `${this.dieLabel(roll)} locked` : `${this.dieLabel(roll)} unlocked`;
+    const currentRoll = this.rolls.find(item => item.id === roll.id);
+    if (!currentRoll) {
+      return;
+    }
+    const locked = !currentRoll.locked;
+    this.replaceRoll({ ...currentRoll, locked });
+    this.lastRollSource = locked ? `${this.dieLabel(currentRoll)} locked` : `${this.dieLabel(currentRoll)} unlocked`;
+  };
+
+  public pressDie = (roll: DieRoll): void => {
+    const currentRoll = this.rolls.find(item => item.id === roll.id);
+    if (currentRoll?.rolling) {
+      this.stopRollingDie(currentRoll.id, true);
+      return;
+    }
+    if (this.rollInProgress) {
+      return;
+    }
+    this.toggleLock(currentRoll ?? roll);
   };
 
   public unlockAllDice = (): void => {
     if (this.lockedCount < 1) {
       return;
     }
-    this.rolls = this.rolls.map(roll => ({ ...roll, locked: false }));
+    this.setRolls(this.rolls.map(roll => ({ ...roll, locked: false })));
     this.lastRollSource = 'Unlocked all';
   };
 
   public dieAriaLabel = (roll: DieRoll): string => {
+    if (roll.rolling) {
+      return `${this.dieLabel(roll)} rolling ${roll.value}, press to stop`;
+    }
     const lockState = this.canLockRolls ? (roll.locked ? ', locked' : ', unlocked') : ', lock unavailable with one die';
     return `${this.dieLabel(roll)} rolled ${roll.value}${lockState}`;
   };
@@ -251,8 +300,11 @@ export class DiceComponent implements OnDestroy, OnInit {
   public dieLabel = (roll: DieRoll): string =>
     `d${roll.sides}`;
 
-  public pipClass = (pip: number): string =>
-    `pip pip-${pip}`;
+  public historyDiceLabel = (die: RollHistoryDie): string =>
+    `${die.label} rolled ${die.value}`;
+
+  public pipClass = (pip: number, value: number): string =>
+    `pip pip-${pip}${this.pipsByValue.get(value)?.includes(pip) ? ' is-visible' : ''}`;
 
   public notation = (): string => {
     const parts = this.dice
@@ -299,6 +351,98 @@ export class DiceComponent implements OnDestroy, OnInit {
     this.zone.run(() => this.rollDice('Shake roll'));
   };
 
+  private scheduleRollTick = (roll: DieRoll): void => {
+    const timer = window.setTimeout(() => {
+      this.zone.run(() => this.advanceRoll(roll.id));
+    }, this.rollFrameMs);
+    this.rollTimers.set(roll.id, timer);
+  };
+
+  private advanceRoll = (rollId: number): void => {
+    this.rollTimers.delete(rollId);
+    const roll = this.rolls.find(item => item.id === rollId);
+    if (!roll?.rolling) {
+      return;
+    }
+    const nextRoll = {
+      ...roll,
+      rollStep: roll.rollStep + 1,
+      value: this.randomRollValue(roll.sides, roll.id, roll.value)
+    };
+    if (nextRoll.rollStep >= nextRoll.rollCount) {
+      this.replaceRoll({
+        ...nextRoll,
+        rolling: false,
+        rollStep: nextRoll.rollCount
+      });
+      this.completeRollIfFinished();
+      return;
+    }
+    this.replaceRoll(nextRoll);
+    this.scheduleRollTick(nextRoll);
+  };
+
+  private stopRollingDie = (rollId: number, userStopped: boolean): void => {
+    const timer = this.rollTimers.get(rollId);
+    if (timer !== undefined) {
+      window.clearTimeout(timer);
+      this.rollTimers.delete(rollId);
+    }
+    const roll = this.rolls.find(item => item.id === rollId);
+    if (!roll?.rolling) {
+      return;
+    }
+    this.replaceRoll({
+      ...roll,
+      rolling: false,
+      rollStep: roll.rollCount
+    });
+    if (userStopped) {
+      this.lastRollSource = `${this.dieLabel(roll)} stopped`;
+    }
+    this.completeRollIfFinished();
+  };
+
+  private completeRollIfFinished = (): void => {
+    if (!this.rollInProgress || this.rolls.some(roll => roll.rolling)) {
+      return;
+    }
+    this.rollInProgress = false;
+    this.lastRollSource = this.activeRollSource;
+    this.addHistoryRecord();
+  };
+
+  private addHistoryRecord = (): void => {
+    const rolledAt = new Date();
+    this.history = [{
+      id: this.nextHistoryId++,
+      rolledAt: rolledAt.toISOString(),
+      timeLabel: this.historyTimeFormatter.format(rolledAt),
+      total: this.totalValue,
+      dice: this.rolls.map(roll => ({
+        id: roll.id,
+        label: this.dieLabel(roll),
+        value: roll.value
+      }))
+    }, ...this.history].slice(0, 6);
+  };
+
+  private cancelRollingDice = (): void => {
+    this.rollTimers.forEach(timer => window.clearTimeout(timer));
+    this.rollTimers.clear();
+    this.rollInProgress = false;
+    this.setRolls(this.rolls.map(roll => ({ ...roll, rolling: false, rollCount: 0, rollStep: 0 })));
+  };
+
+  private replaceRoll = (roll: DieRoll): void => {
+    this.setRolls(this.rolls.map(item => item.id === roll.id ? roll : item));
+  };
+
+  private setRolls = (rolls: DieRoll[]): void => {
+    this.rolls = rolls;
+    this.changeDetector.markForCheck();
+  };
+
   private findDie = (sides: number): DieConfig | undefined =>
     this.dice.find(die => die.sides === sides);
 
@@ -329,10 +473,19 @@ export class DiceComponent implements OnDestroy, OnInit {
     if (this.totalDice > 1) {
       return;
     }
-    this.rolls = this.rolls.map(roll => ({ ...roll, locked: false }));
+    this.setRolls(this.rolls.map(roll => ({ ...roll, locked: false })));
   };
 
-  private diceCode = (): string =>
+  private updateDiceQueryParam = (): void => {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { dice: this.diceQueryCode() || null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  };
+
+  private diceQueryCode = (): string =>
     this.dice
       .filter(die => die.amount > 0)
       .map(die => `${die.amount}d${die.sides}`)
@@ -356,4 +509,21 @@ export class DiceComponent implements OnDestroy, OnInit {
       id: `die-${dieIndex}-d${sides}-face-${ndx + 1}`,
       value: ndx + 1
     }));
+
+  private randomRollCount = (): number => {
+    const counts = Array.from(
+      { length: this.maxRollFrames - this.minRollFrames + 1 },
+      (_, ndx) => this.minRollFrames + ndx
+    );
+    return seededShuffle(counts, count => count).items[0];
+  };
+
+  private randomRollValue = (sides: number, dieIndex: number, currentValue?: number): number => {
+    const faces = this.rollableFaces(sides, dieIndex);
+    let value = seededShuffle(faces, face => face.id).items[0].value;
+    for (let attempt = 0; attempt < 4 && faces.length > 1 && value === currentValue; attempt++) {
+      value = seededShuffle(faces, face => `${face.id}-${attempt}`).items[0].value;
+    }
+    return value;
+  };
 }

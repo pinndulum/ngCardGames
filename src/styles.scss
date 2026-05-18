@@ -279,7 +279,6 @@ body #main {
     min-width: 0;
 }
 
-.title-seed-pill,
 .title-meta-pill {
     align-items: baseline;
     background: #f7f0d7;
@@ -298,27 +297,8 @@ body #main {
     padding: 0.35rem 0.7rem;
 }
 
-.title-seed-pill {
-    cursor: pointer;
-    justify-content: flex-start;
-}
-
-.title-seed-pill:hover {
-    background: #fff8df;
-    opacity: 1;
-}
-
-.title-seed-pill span,
 .title-meta-pill {
     text-transform: uppercase;
-}
-
-.title-seed-pill strong {
-    color: #1a6b55;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .game-button {
@@ -584,6 +564,11 @@ body #main {
     filter: brightness(1.05);
 }
 
+.dice .die-face.is-rolling {
+    animation: dice-tumble 0.16s linear infinite;
+    filter: brightness(1.08);
+}
+
 .dice .die-lock {
     align-items: center;
     background: #f5cb62;
@@ -606,6 +591,12 @@ body #main {
     min-height: 0;
     width: 2.3rem;
     z-index: 2;
+}
+
+@keyframes dice-tumble {
+    50% {
+        transform: translateY(-2px) rotate(2deg);
+    }
 }
 
 .mahjong .mahjong-table {
@@ -879,7 +870,6 @@ body #main {
         width: 100%;
     }
 
-    .title-seed-pill,
     .title-meta-pill {
         border-radius: 6px;
         max-width: 100%;

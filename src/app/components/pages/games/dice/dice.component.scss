@@ -283,12 +283,7 @@
     grid-area: 3 / 3;
 }
 
-.die-face[data-value="1"] .pip-4,
-.die-face[data-value="2"] :is(.pip-1, .pip-7),
-.die-face[data-value="3"] :is(.pip-1, .pip-4, .pip-7),
-.die-face[data-value="4"] :is(.pip-1, .pip-2, .pip-6, .pip-7),
-.die-face[data-value="5"] :is(.pip-1, .pip-2, .pip-4, .pip-6, .pip-7),
-.die-face[data-value="6"] :is(.pip-1, .pip-2, .pip-3, .pip-5, .pip-6, .pip-7) {
+.pip.is-visible {
     opacity: 1;
 }
 
@@ -322,20 +317,43 @@
     border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 6px;
     color: rgba(255, 255, 255, 0.9);
+}
+
+.history-empty {
     padding: 0.45rem 0.55rem;
 }
 
-.history-row {
+.history-row summary {
+    cursor: pointer;
+    padding: 0.45rem 0.55rem;
+}
+
+.history-row summary strong {
+    float: right;
+    margin-left: 0.5rem;
+}
+
+.history-row time {
+    display: inline-block;
+    max-width: calc(100% - 4.2rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
+    white-space: nowrap;
+}
+
+.history-details {
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    display: grid;
+    gap: 0.3rem;
+    padding: 0 0.55rem 0.5rem;
+}
+
+.history-die {
     align-items: center;
     display: grid;
     gap: 0.5rem;
     grid-template-columns: minmax(0, 1fr) auto;
-}
-
-.history-row span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 @media (max-width: 920px) {

@@ -9,12 +9,6 @@
     <div class="game-title-row">
         <h1>Dice Table</h1>
         <span class="title-meta-pill">{{notation()}}</span>
-        @if (rollSeed) {
-            <button type="button" class="title-seed-pill" [title]="rollSeed" (click)="setSeedQueryParam()">
-                <span>Roll</span>
-                <strong>{{rollSeedLabel}}</strong>
-            </button>
-        }
     </div>
 </div>
 <section class="section dice">
@@ -38,7 +32,8 @@
             </div>
             <div class="dice-actions">
                 <button type="button" class="game-button game-button-primary" [disabled]="!canRoll"
-                    [attr.title]="allCurrentRollsLocked ? 'Unlock a die to roll again' : null" (click)="rollDice()">
+                    [attr.title]="isRolling ? 'Dice are rolling' : (allCurrentRollsLocked ? 'Unlock a die to roll again' : null)"
+                    (click)="rollDice()">
                     <i class="bi bi-dice-6" aria-hidden="true"></i>
                     <span>Roll</span>
                 </button>
@@ -46,15 +41,14 @@
                     <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
                     <span>Reset</span>
                 </button>
-                <button type="button" class="game-button" [disabled]="!rollSeed || !canRoll" (click)="replayRoll()">
-                    <i class="bi bi-repeat" aria-hidden="true"></i>
-                    <span>Replay</span>
-                </button>
             </div>
             <div class="game-status" aria-label="Dice status">
                 <span><strong>{{totalDice}}</strong> Dice</span>
                 <span><strong>{{totalValue}}</strong> Total</span>
                 <span><strong>{{lockedCount}}</strong> Locked</span>
+                @if (rollingCount > 0) {
+                    <span><strong>{{rollingCount}}</strong> Rolling</span>
+                }
                 <span><strong>{{lastRollSource}}</strong></span>
             </div>
         </div>
@@ -98,12 +92,11 @@
                     </div>
                     <div class="rolled-dice">
                         @for (roll of rolls; track roll.id) {
-                            <button type="button" [class]="dieClass(roll)" [class.is-locked]="roll.locked"
-                                [class.lock-unavailable]="!canLockRolls"
-                                [attr.data-sides]="roll.sides" [attr.data-value]="roll.value"
-                                [attr.aria-pressed]="canLockRolls ? roll.locked : null"
-                                [attr.aria-disabled]="!canLockRolls" [attr.aria-label]="dieAriaLabel(roll)"
-                                (click)="toggleLock(roll)">
+                            <button type="button" [class]="dieClass(roll)" [attr.data-sides]="roll.sides"
+                                [attr.data-value]="roll.value"
+                                [attr.aria-pressed]="canLockRolls && !roll.rolling ? roll.locked : null"
+                                [attr.aria-disabled]="!canLockRolls && !roll.rolling"
+                                [attr.aria-label]="dieAriaLabel(roll)" (click)="pressDie(roll)">
                                 @if (roll.locked) {
                                     <span class="die-lock" aria-hidden="true">
                                         <i class="bi bi-check-lg"></i>
@@ -112,7 +105,7 @@
                                 @if (roll.sides === 6) {
                                     <span class="pip-grid" aria-hidden="true">
                                         @for (pip of pipSlots; track pip) {
-                                            <span [class]="pipClass(pip)"></span>
+                                            <span [class]="pipClass(pip, roll.value)"></span>
                                         }
                                     </span>
                                 } @else {
@@ -133,11 +126,21 @@
 
             <div class="roll-history" aria-label="Recent rolls">
                 <h2>Recent Rolls</h2>
-                @for (item of history; track $index) {
-                    <div class="history-row">
-                        <span>{{item.label}}</span>
-                        <strong>{{item.total}}</strong>
-                    </div>
+                @for (item of history; track item.id) {
+                    <details class="history-row">
+                        <summary>
+                            <time [attr.datetime]="item.rolledAt">{{item.timeLabel}}</time>
+                            <strong>{{item.total}}</strong>
+                        </summary>
+                        <div class="history-details">
+                            @for (die of item.dice; track die.id) {
+                                <div class="history-die" [attr.aria-label]="historyDiceLabel(die)">
+                                    <span>{{die.label}}</span>
+                                    <strong>{{die.value}}</strong>
+                                </div>
+                            }
+                        </div>
+                    </details>
                 } @empty {
                     <div class="history-empty">No rolls yet</div>
                 }
