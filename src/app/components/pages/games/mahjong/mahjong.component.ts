@@ -23,6 +23,18 @@ interface MahjongTile extends TilePosition {
   matched: boolean;
 }
 
+interface MahjongTileSnapshot {
+  id: string;
+  face: TileFace;
+  matched: boolean;
+}
+
+interface MahjongMoveSnapshot {
+  moves: number;
+  shuffles: number;
+  tiles: MahjongTileSnapshot[];
+}
+
 interface TileFaceDeal {
   id: string;
   face: TileFace;
@@ -253,7 +265,11 @@ export class MahjongComponent implements AfterViewInit, OnInit {
   public hintedIds: string[] = [];
   public gameSeed = '';
   public moves = 0;
+  public shuffles = 0;
   public message = 'Match open pairs to clear the table.';
+
+  private moveSnapshots: MahjongMoveSnapshot[] = [];
+  private nextHintIndex = 0;
 
   ngOnInit(): void {
     this.applyRoutePattern();
@@ -278,6 +294,10 @@ export class MahjongComponent implements AfterViewInit, OnInit {
 
   public get availableMoveCount(): number {
     return this.availablePairs().length;
+  }
+
+  public get canUndo(): boolean {
+    return this.moveSnapshots.length > 0;
   }
 
   public get isComplete(): boolean {
@@ -312,8 +332,10 @@ export class MahjongComponent implements AfterViewInit, OnInit {
       matched: false
     }));
     this.selectedTile = undefined;
-    this.hintedIds = [];
+    this.clearHints(true);
+    this.moveSnapshots = [];
     this.moves = 0;
+    this.shuffles = 0;
     this.message = `${this.selectedPattern.name} set. ${positions.length / 2} pairs on the table.`;
     this.alignBoardStart();
   };
@@ -330,6 +352,7 @@ export class MahjongComponent implements AfterViewInit, OnInit {
     if (remaining.length < 2) {
       return;
     }
+    this.captureMoveSnapshot();
     const remainingFaces = remaining.map((tile, ndx) => ({
       id: `${tile.id}:${tile.face.key}:${ndx}`,
       face: tile.face
@@ -339,8 +362,8 @@ export class MahjongComponent implements AfterViewInit, OnInit {
       tile.face = result.items[ndx].face;
     });
     this.selectedTile = undefined;
-    this.hintedIds = [];
-    this.moves += 1;
+    this.clearHints(true);
+    this.shuffles += 1;
     this.message = 'The remaining tiles were mixed.';
   };
 
@@ -357,21 +380,44 @@ export class MahjongComponent implements AfterViewInit, OnInit {
   };
 
   public showHint = (): void => {
-    const pair = this.availablePairs()[0];
+    const pairs = this.availablePairs();
+    const pairIndex = this.nextHintIndex % pairs.length;
+    const pair = pairs[pairIndex];
     if (!pair) {
-      this.hintedIds = [];
+      this.clearHints(true);
       this.message = this.remainingCount > 0 ? 'No open pairs. Shuffle or start fresh.' : 'Table cleared.';
       return;
     }
     this.hintedIds = [pair[0].id, pair[1].id];
-    this.message = `Try the ${pair[0].face.label} ${pair[0].face.sublabel} pair.`;
+    this.nextHintIndex = (pairIndex + 1) % pairs.length;
+    this.message = `Hint ${pairIndex + 1} of ${pairs.length}: match ${pair[0].face.label} ${pair[0].face.sublabel}.`;
+  };
+
+  public undo = (): void => {
+    const snapshot = this.moveSnapshots[this.moveSnapshots.length - 1];
+    if (!snapshot) {
+      return;
+    }
+    const tileSnapshots = new Map(snapshot.tiles.map(tile => [tile.id, tile]));
+    this.tiles = this.tiles.map(tile => {
+      const tileSnapshot = tileSnapshots.get(tile.id);
+      return tileSnapshot
+        ? { ...tile, face: tileSnapshot.face, matched: tileSnapshot.matched }
+        : tile;
+    });
+    this.moveSnapshots = this.moveSnapshots.slice(0, -1);
+    this.selectedTile = undefined;
+    this.clearHints(true);
+    this.moves = snapshot.moves;
+    this.shuffles = snapshot.shuffles;
+    this.message = 'Move undone.';
   };
 
   public selectTile = (tile: MahjongTile): void => {
     if (!this.isTileFree(tile)) {
       return;
     }
-    this.hintedIds = [];
+    this.clearHints();
     if (this.selectedTile?.id === tile.id) {
       this.selectedTile = undefined;
       return;
@@ -382,9 +428,11 @@ export class MahjongComponent implements AfterViewInit, OnInit {
       return;
     }
     if (this.selectedTile.face.key === tile.face.key) {
+      this.captureMoveSnapshot();
       this.selectedTile.matched = true;
       tile.matched = true;
       this.selectedTile = undefined;
+      this.clearHints(true);
       this.moves += 1;
       this.message = this.isComplete ? 'Table cleared.' : 'Pair matched.';
       return;
@@ -476,14 +524,40 @@ export class MahjongComponent implements AfterViewInit, OnInit {
 
   private availablePairs = (): [MahjongTile, MahjongTile][] => {
     const freeTiles = this.visibleTiles.filter(tile => this.isTileFree(tile));
+    const tilesByFace = new Map<string, MahjongTile[]>();
+    freeTiles.forEach(tile => {
+      const tiles = tilesByFace.get(tile.face.key) ?? [];
+      tiles.push(tile);
+      tilesByFace.set(tile.face.key, tiles);
+    });
     const pairs: [MahjongTile, MahjongTile][] = [];
-    freeTiles.forEach((tile, ndx) => {
-      const match = freeTiles.slice(ndx + 1).find(other => other.face.key === tile.face.key);
-      if (match) {
-        pairs.push([tile, match]);
+    tilesByFace.forEach(tiles => {
+      for (let first = 0; first < tiles.length - 1; first++) {
+        for (let second = first + 1; second < tiles.length; second++) {
+          pairs.push([tiles[first], tiles[second]]);
+        }
       }
     });
     return pairs;
+  };
+
+  private captureMoveSnapshot = (): void => {
+    this.moveSnapshots = [...this.moveSnapshots, {
+      moves: this.moves,
+      shuffles: this.shuffles,
+      tiles: this.tiles.map(tile => ({
+        id: tile.id,
+        face: tile.face,
+        matched: tile.matched
+      }))
+    }];
+  };
+
+  private clearHints = (resetCycle = false): void => {
+    this.hintedIds = [];
+    if (resetCycle) {
+      this.nextHintIndex = 0;
+    }
   };
 
   private alignBoardStart = (): void => {

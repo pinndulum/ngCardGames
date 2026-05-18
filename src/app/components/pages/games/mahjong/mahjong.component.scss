@@ -29,13 +29,13 @@
 }
 
 .mahjong-toolbar {
-    align-items: center;
+    align-items: stretch;
     background: var(--panel);
     border-bottom: 1px solid rgba(255, 255, 255, 0.18);
     color: #f8fcf9;
     display: grid;
     gap: 0.75rem;
-    grid-template-columns: minmax(0, auto) minmax(10rem, 14rem) 1fr;
+    grid-template-columns: minmax(0, 1fr);
     padding: 0.875rem 1rem;
 }
 
@@ -54,6 +54,8 @@
     display: grid;
     gap: 0.2rem;
     margin: 0;
+    max-width: 14rem;
+    width: 100%;
 }
 
 .mahjong-layout span {
@@ -301,7 +303,6 @@
     }
 
     .mahjong-toolbar {
-        grid-template-columns: 1fr;
         padding: 0.65rem;
     }
 
@@ -319,7 +320,7 @@
     .game-status {
         display: grid;
         gap: 0.35rem;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(4.1rem, 1fr));
         justify-content: stretch;
     }
 
