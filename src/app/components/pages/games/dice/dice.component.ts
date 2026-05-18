@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ActivatedRoute, Router } from '@angular/router';
 import { resolveShuffleSeed, seededShuffle, shuffleSeedLabel } from '../../../../utils/seeded-shuffle';
@@ -46,6 +46,7 @@ type DeviceMotionEventConstructor = typeof DeviceMotionEvent & {
 export class DiceComponent implements OnDestroy, OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly zone = inject(NgZone);
 
   public readonly dice: DieConfig[] = [
     { sides: 2, label: 'd2', amount: 0, max: 12 },
@@ -295,7 +296,7 @@ export class DiceComponent implements OnDestroy, OnInit {
       return;
     }
     this.lastShakeAt = now;
-    this.rollDice('Shake roll');
+    this.zone.run(() => this.rollDice('Shake roll'));
   };
 
   private findDie = (sides: number): DieConfig | undefined =>
