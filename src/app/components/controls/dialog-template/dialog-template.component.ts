@@ -2,7 +2,7 @@ import { CdkScrollable } from '@angular/cdk/scrolling';
 import { Component, inject } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { DialogAction, DialogModel } from '../../../../assets/dialog.message';
+import { DialogModel } from '../../../../assets/dialog.message';
 import { SafePipe } from '../../../pipes/safe.pipe';
 
 export interface IFrameSource {
@@ -17,7 +17,7 @@ export interface ImageSource {
 
 export interface ButtonAction {
     title: string;
-    action?: DialogAction;
+    action?: string;
 }
 
 @Component({
@@ -28,7 +28,7 @@ export interface ButtonAction {
 })
 export class DialogTemplateComponent {
     private readonly data = inject<DialogModel>(MAT_DIALOG_DATA);
-    private readonly dialogRef = inject<MatDialogRef<DialogTemplateComponent, DialogAction>>(MatDialogRef);
+    private readonly dialogRef = inject<MatDialogRef<DialogTemplateComponent, string>>(MatDialogRef);
 
     protected title: string;
     protected message?: string;

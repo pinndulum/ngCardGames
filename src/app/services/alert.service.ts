@@ -2,11 +2,11 @@ import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogState } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { lastValueFrom } from 'rxjs';
-import { DialogAction, DialogMessage, DialogModel } from '../../assets/dialog.message';
+import { DialogMessage, DialogModel } from '../../assets/dialog.message';
 import { DialogTemplateComponent } from '../components/controls/dialog-template/dialog-template.component';
 import { AppConfig } from '../interfaces/app-config.interface';
 
-export { DialogAction, DialogModel, MatDialogState };
+export { DialogModel, MatDialogState };
 
 export interface AlertMessage {
     type: 'log' | 'warn' | 'error' | 'no-log';
@@ -18,9 +18,10 @@ export interface AlertMessage {
 
 @Injectable({ providedIn: 'root' })
 export class AlertService {
-    private cfg = inject(AppConfig);
-    private dialog = inject(MatDialog);
-    private snackbar = inject(MatSnackBar);
+    private readonly cfg = inject(AppConfig);
+    private readonly dialog = inject(MatDialog);
+    private readonly snackbar = inject(MatSnackBar);
+
 
     success = (message: string, log?: boolean, ...props: unknown[]) => {
         log ??= this.cfg.env !== 'production';
@@ -51,7 +52,7 @@ export class AlertService {
         return ref?.getState();
     };
 
-    showDialog = async (data: DialogModel, disableClose = true): Promise<DialogAction | undefined> => {
+    showDialog = async (data: DialogModel, disableClose = true): Promise<string | undefined> => {
         const ref = this.dialog.open(DialogTemplateComponent, {
             data,
             disableClose,
@@ -60,7 +61,7 @@ export class AlertService {
             panelClass: data.opts?.panelClass,
             width: data.opts?.width
         });
-        return await lastValueFrom<DialogAction | undefined>(ref.afterClosed());
+        return await lastValueFrom<string | undefined>(ref.afterClosed());
     };
 
     dialogMsgState = (key: string): MatDialogState | undefined => {
@@ -68,7 +69,7 @@ export class AlertService {
         return ref?.getState();
     };
 
-    showDialogMsg = async (key: string): Promise<DialogAction | undefined> => {
+    showDialogMsg = async (key: string): Promise<string | undefined> => {
         let result;
         if (DialogMessage[key]) {
             result = await this.showDialog(DialogMessage[key]);
@@ -77,6 +78,7 @@ export class AlertService {
     };
 
 
-    private findDialog = (data: DialogModel) => this.dialog.openDialogs.find(x => x.componentInstance.data === data);
+    private findDialog = (data: DialogModel) =>
+        this.dialog.openDialogs.find(x => x.componentInstance.data === data);
     private findDialogMsg = (key: string) => this.findDialog(DialogMessage[key]);
 }

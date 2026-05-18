@@ -8,12 +8,8 @@ import {
   CdkDropListGroup
 } from '@angular/cdk/drag-drop';
 import { ChangeDetectorRef, Component, inject, NgZone, OnInit, ViewEncapsulation } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute, Router } from '@angular/router';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { lastValueFrom, take } from 'rxjs';
-import { DialogAction } from '../../../../../../../assets/dialog.message';
-import { DialogTemplateComponent } from '../../../../../controls/dialog-template/dialog-template.component';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CardState } from '../../../../../../enum';
 import { FaceCardName } from '../../../../../../enum/facecards';
 import { FaceCardStyle, ICard, IPile } from '../../../../../../interfaces';
@@ -21,6 +17,7 @@ import { Card } from '../../../../../../models/card';
 import { cardRecord, GameHistory, HistoryData, moveHistory } from '../../../../../../models/game.history';
 import { Draw, Foundation, Tableau } from '../../../../../../models/piles';
 import { FaceCards } from '../../../../../../models/piles/decks';
+import { AlertService } from '../../../../../../services/alert.service';
 import { flatten } from '../../../../../../utils/array';
 
 type DropPileType = 'foundations' | 'tableaus';
@@ -40,7 +37,7 @@ type DropPileType = 'foundations' | 'tableaus';
   ]
 })
 export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements OnInit {
-  private readonly dialog = inject(MatDialog);
+  private readonly alert = inject(AlertService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly zone = inject(NgZone);
   private readonly route = inject(ActivatedRoute);
@@ -155,32 +152,23 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
     this.checkWin();
   }
 
-  private checkWin = () => {
+  private checkWin = async (): Promise<void> => {
     const cards = flatten(this.foundations.map(x => x.cards));
     const winner = (cards || []).length === 52;
     if (!winner) {
       return;
     }
-    const windlg = this.dialog.open<DialogTemplateComponent, unknown, DialogAction>(DialogTemplateComponent, {
-      disableClose: true,
-      data: {
-        title: 'You Won!',
-        message: 'Winner, winner... chicken dinner!',
-        opts: {
-          buttons: [{ title: 'Ok' }, {
-            title: 'New Game', action: () => {
-              this.history.records.splice(0);
-              this.startGame();
-            }
-          }]
-        }
+    const result = await this.alert.showDialog({
+      title: 'You Won!',
+      message: 'Winner, winner... chicken dinner!',
+      opts: {
+        buttons: [{ title: 'Ok' }, { title: 'New Game', action: 'new-game' }]
       }
     });
-    void lastValueFrom(windlg.afterClosed()).then(result => {
-      if (typeof result === 'function') {
-        result();
-      }
-    });
+    if (result === 'new-game') {
+      this.history.records.splice(0);
+      this.startGame();
+    }
   }
 
   public undo = () => {
@@ -205,19 +193,15 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
     }
   }
 
-  private isConfirmYes = (result: DialogAction | undefined): boolean =>
+  private isConfirmYes = (result: string | undefined): boolean =>
     typeof result === 'string' && result.toLowerCase() === 'yes';
 
   private askRestart = (seed?: string): void => {
-    const askdlg = this.dialog.open<DialogTemplateComponent, unknown, DialogAction>(DialogTemplateComponent, {
-      disableClose: true,
-      data: {
-        title: 'Are you sure?',
-        message: 'Are you sure you would like to start a new game?',
-        opts: { buttons: [{ title: 'Yes', action: 'yes' }, { title: 'No', action: 'no' }] }
-      }
-    });
-    askdlg.afterClosed().pipe(take(1)).subscribe(result => {
+    void this.alert.showDialog({
+      title: 'Are you sure?',
+      message: 'Are you sure you would like to start a new game?',
+      opts: { buttons: [{ title: 'Yes', action: 'yes' }, { title: 'No', action: 'no' }] }
+    }).then(result => {
       if (!this.isConfirmYes(result)) {
         return;
       }

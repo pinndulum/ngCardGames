@@ -1,0 +1,16 @@
+{
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit",
+        "source.organizeImports": "explicit"
+    },
+    "editor.formatOnSaveMode": "modifications",
+    "editor.formatOnType": true,
+    "git.autofetch": true,
+    "git.confirmSync": false,
+    "js/ts.tsdk.path": "node_modules\\typescript\\lib",
+    "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+    "js/ts.updateImportsOnFileMove.enabled": "always",
+}

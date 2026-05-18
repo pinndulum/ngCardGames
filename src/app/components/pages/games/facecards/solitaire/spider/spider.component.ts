@@ -8,18 +8,15 @@ import {
   CdkDropListGroup
 } from '@angular/cdk/drag-drop';
 import { ChangeDetectorRef, Component, inject, NgZone, OnInit, ViewEncapsulation } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
-import { lastValueFrom, take } from 'rxjs';
-import { DialogAction } from '../../../../../../../assets/dialog.message';
-import { DialogTemplateComponent } from '../../../../../controls/dialog-template/dialog-template.component';
 import { CardState } from '../../../../../../enum';
 import { FaceCardName } from '../../../../../../enum/facecards';
 import { FaceCardStyle, IPile } from '../../../../../../interfaces';
 import { Card } from '../../../../../../models/card';
 import { GameHistory, MoveHistory } from '../../../../../../models/game.history';
-import { FaceCards } from '../../../../../../models/piles/decks';
 import { Foundation, Tableau } from '../../../../../../models/piles';
+import { FaceCards } from '../../../../../../models/piles/decks';
+import { AlertService } from '../../../../../../services/alert.service';
 
 type SpiderSnapshot<FaceCard extends Card<FaceCardStyle>> = {
   pile: IPile;
@@ -40,7 +37,7 @@ type SpiderSnapshot<FaceCard extends Card<FaceCardStyle>> = {
   ]
 })
 export class SpiderComponent<FaceCard extends Card<FaceCardStyle>> implements OnInit {
-  private readonly dialog = inject(MatDialog);
+  private readonly alert = inject(AlertService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly zone = inject(NgZone);
   private readonly route = inject(ActivatedRoute);
@@ -224,45 +221,32 @@ export class SpiderComponent<FaceCard extends Card<FaceCardStyle>> implements On
     return moved;
   }
 
-  private checkWin = (): void => {
+  private checkWin = async (): Promise<void> => {
     if (this.completedRuns !== 8) {
       return;
     }
-    const windlg = this.dialog.open<DialogTemplateComponent, unknown, DialogAction>(DialogTemplateComponent, {
-      disableClose: true,
-      data: {
-        title: 'You Won!',
-        message: 'All eight runs are complete.',
-        opts: {
-          buttons: [{ title: 'Ok' }, {
-            title: 'New Game', action: () => {
-              this.history.records.splice(0);
-              this.startGame();
-            }
-          }]
-        }
+    const result = await this.alert.showDialog({
+      title: 'You Won!',
+      message: 'All eight runs are complete.',
+      opts: {
+        buttons: [{ title: 'Ok' }, { title: 'New Game', action: 'new-game' }]
       }
     });
-    void lastValueFrom(windlg.afterClosed()).then(result => {
-      if (typeof result === 'function') {
-        result();
-      }
-    });
+    if (result === 'new-game') {
+      this.history.records.splice(0);
+      this.startGame();
+    }
   }
 
-  private isConfirmYes = (result: DialogAction | undefined): boolean =>
+  private isConfirmYes = (result: string | undefined): boolean =>
     typeof result === 'string' && result.toLowerCase() === 'yes';
 
   private askRestart = (seed?: string): void => {
-    const askdlg = this.dialog.open<DialogTemplateComponent, unknown, DialogAction>(DialogTemplateComponent, {
-      disableClose: true,
-      data: {
-        title: 'Are you sure?',
-        message: 'Are you sure you would like to start a new game?',
-        opts: { buttons: [{ title: 'Yes', action: 'yes' }, { title: 'No', action: 'no' }] }
-      }
-    });
-    askdlg.afterClosed().pipe(take(1)).subscribe(result => {
+    void this.alert.showDialog({
+      title: 'Are you sure?',
+      message: 'Are you sure you would like to start a new game?',
+      opts: { buttons: [{ title: 'Yes', action: 'yes' }, { title: 'No', action: 'no' }] }
+    }).then(result => {
       if (!this.isConfirmYes(result)) {
         return;
       }

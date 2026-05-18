@@ -9,7 +9,6 @@ import { HeaderComponent } from './components/layouts/header/header.component';
 import { SidebarStateService } from './components/layouts/sidebar-state.service';
 import { SidebarComponent } from './components/layouts/sidebar/sidebar.component';
 import { AppConfig } from './interfaces/app-config.interface';
-import { AlertService, MatDialogState } from './services/alert.service';
 import { LoadingService } from './services/loading.service';
 import { PrefsService } from './services/prefs.service';
 
@@ -30,7 +29,6 @@ export class AppComponent implements OnInit {
   private readonly loc = inject(Location);
   private readonly cfg = inject(AppConfig);
   private readonly prefs = inject(PrefsService);
-  private readonly alert = inject(AlertService);
   private readonly loading = inject(LoadingService);
   private readonly route = inject(ActivatedRoute);
   private readonly sidebarState = inject(SidebarStateService);
@@ -60,17 +58,8 @@ export class AppComponent implements OnInit {
 
     const rt = this.route.firstChild?.snapshot;
     const layout = rt?.data['layout'] ?? 'default';
-    if (layout === 'default') {
-      if (localStorage.getItem('govWarn') !== 'true') {
-        if (this.alert.dialogMsgState('govWarn') !== MatDialogState.OPEN) {
-          this.alert.showDialogMsg('govWarn');
-          localStorage.setItem('govWarn', 'true');
-        }
-      }
-    } else {
-      const classes = window.document.body.classList;
-      classes.add(layout);
-    }
+    const classes = window.document.body.classList;
+    classes.add(layout);
   };
 
   protected readonly closeSidebarOverlay = (): void => this.sidebarState.closeOnMobileNavigation();
