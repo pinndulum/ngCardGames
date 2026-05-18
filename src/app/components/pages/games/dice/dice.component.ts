@@ -146,16 +146,6 @@ export class DiceComponent implements OnDestroy, OnInit {
     this.lastRollSource = preset.name;
   };
 
-  public clearDice = (): void => {
-    this.dice.forEach(die => {
-      die.amount = 0;
-    });
-    this.rolls = [];
-    this.rollSeed = '';
-    this.lastRollDiceCode = '';
-    this.lastRollSource = 'Cleared';
-  };
-
   public resetDiceSelection = (): void => {
     this.dice.forEach(die => {
       die.amount = die.sides === 6 ? 1 : 0;
@@ -248,6 +238,14 @@ export class DiceComponent implements OnDestroy, OnInit {
     }
     roll.locked = !roll.locked;
     this.lastRollSource = roll.locked ? `${this.dieLabel(roll)} locked` : `${this.dieLabel(roll)} unlocked`;
+  };
+
+  public unlockAllDice = (): void => {
+    if (this.lockedCount < 1) {
+      return;
+    }
+    this.rolls = this.rolls.map(roll => ({ ...roll, locked: false }));
+    this.lastRollSource = 'Unlocked all';
   };
 
   public dieAriaLabel = (roll: DieRoll): string => {
