@@ -2,6 +2,37 @@
 
 All notable changes to JM Card Games are documented here.
 
+## 1.3.0 - 2026-05-18
+
+### Added
+
+- Added animated Dice Table rolls where each die rolls independently, updates its face during the roll, and can be tapped to stop while other dice continue.
+- Added a floating Dice Table unlock-all control that appears only when dice are locked.
+- Added shareable Dice Table selection URLs using the `?dice=` query string.
+- Added expandable Dice Table roll history showing the roll time, total, and each die result.
+- Added Mahjong undo for matched pairs and remaining-tile shuffles.
+- Added Mahjong hint cycling through every currently playable pair combination before looping back to the first hint.
+- Added a Mahjong shuffle count stat alongside moves, tiles, open tiles, and playable pairs.
+
+### Changed
+
+- Replaced Dice Table replay/roll-seed controls with reset-based flow and live dice selection URLs.
+- Improved Dice Table shake-to-roll so mobile motion rolls update the visible board without requiring a tap.
+- Reworked Mahjong controls into three header rows: pattern selector, action buttons, then stats.
+- Updated Mahjong move counting so matched pairs and remaining-tile shuffles are tracked separately.
+- Changed sidebar section behavior so opening one navigation section no longer closes another.
+
+### Removed
+
+- Hid the unfinished Free Play entry from the sidebar.
+- Removed unused prototype extension imports, unused helper methods, unused icon packages, and unused vendored assets.
+
+### Verified
+
+- `npm run build`
+- `npm run lint`
+- `npm run test:ci`
+
 ## 1.2.0 - 2026-05-16
 
 ### Added
