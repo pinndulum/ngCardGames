@@ -8,10 +8,6 @@ export class Deck<T extends ICard> extends Pile<'Deck', T> {
     public backImg = Deck.defaultBackImg;
     public shuffleSeed?: string;
 
-    public setBackImg = (back: string) => {
-        this.cards.forEach(x => x.style.images.back = back || Deck.defaultBackImg);
-    }
-
     public shuffle = (count?: number, seed?: string): ICard[] => {
         const result = seededShuffle(this.cards, card => card.ids.deckId, count, seed);
         this.shuffleSeed = result.seed;

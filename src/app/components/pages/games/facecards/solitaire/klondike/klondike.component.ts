@@ -1,11 +1,11 @@
 import {
-  CdkDrag,
-  CdkDragDrop,
-  CdkDragPlaceholder,
-  CdkDragPreview,
-  CdkDragStart,
-  CdkDropList,
-  CdkDropListGroup
+    CdkDrag,
+    CdkDragDrop,
+    CdkDragPlaceholder,
+    CdkDragPreview,
+    CdkDragStart,
+    CdkDropList,
+    CdkDropListGroup
 } from '@angular/cdk/drag-drop';
 import { ChangeDetectorRef, Component, inject, NgZone, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -196,17 +196,15 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
   private isConfirmYes = (result: string | undefined): boolean =>
     typeof result === 'string' && result.toLowerCase() === 'yes';
 
-  private askRestart = (seed?: string): void => {
-    void this.alert.showDialog({
+  private askRestart = async (seed?: string): Promise<void> => {
+    const result = await this.alert.showDialog({
       title: 'Are you sure?',
       message: 'Are you sure you would like to start a new game?',
       opts: { buttons: [{ title: 'Yes', action: 'yes' }, { title: 'No', action: 'no' }] }
-    }).then(result => {
-      if (!this.isConfirmYes(result)) {
-        return;
-      }
-      this.zone.run(() => this.dealGame(seed));
     });
+    if (this.isConfirmYes(result)) {
+      this.dealGame(seed);
+    }
   }
 
   private requestGame = (seed?: string): void => {

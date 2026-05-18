@@ -41,10 +41,11 @@ export class Pile<T extends PileType, U extends ICard> implements IPile {
     }
 
     public remove = (card: ICard): void => {
-        if (!this.includes(card.ids.deckId)) {
+        const index = this.cards.indexOf(card as U);
+        if (index < 0) {
             return;
         }
-        this.cards.remove(card as U);
+        this.cards.splice(index, 1);
     }
 
     public move = (to_pile: IPile, start?: number, count?: number): U[] => {

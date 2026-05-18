@@ -34,12 +34,9 @@
               "src/styles.scss",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/bootstrap-icons/font/bootstrap-icons.css",
-              "node_modules/boxicons/css/boxicons.min.css",
-              "node_modules/remixicon/fonts/remixicon.css",
               "src/assets/css/main.css"
             ],
             "scripts": [
-              "src/assets/js/main.js",
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ],
             "browser": "src/main.ts"
@@ -111,12 +108,9 @@
               "src/styles.scss",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/bootstrap-icons/font/bootstrap-icons.css",
-              "node_modules/boxicons/css/boxicons.min.css",
-              "node_modules/remixicon/fonts/remixicon.css",
               "src/assets/css/main.css"
             ],
             "scripts": [
-              "src/assets/js/main.js",
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ]
           }

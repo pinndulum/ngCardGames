@@ -71,7 +71,6 @@ export class DiceComponent implements OnDestroy, OnInit {
   public history: RollHistory[] = [];
   public rollSeed = '';
   public shakeEnabled = false;
-  public shakeNotice = 'Shake off';
   public lastRollSource = 'Ready';
 
   private lastRollDiceCode = '';
@@ -213,14 +212,6 @@ export class DiceComponent implements OnDestroy, OnInit {
     });
   };
 
-  public toggleShake = async (): Promise<void> => {
-    if (this.shakeEnabled) {
-      this.disableShake();
-      return;
-    }
-    await this.enableShake();
-  };
-
   public setShakeEnabled = async (enabled: boolean): Promise<void> => {
     if (enabled) {
       await this.enableShake();
@@ -271,26 +262,26 @@ export class DiceComponent implements OnDestroy, OnInit {
 
   private enableShake = async (): Promise<void> => {
     if (typeof DeviceMotionEvent === 'undefined') {
-      this.shakeNotice = 'Shake unavailable';
+      this.lastRollSource = 'Shake unavailable';
       return;
     }
     const motionEvent = DeviceMotionEvent as DeviceMotionEventConstructor;
     if (typeof motionEvent.requestPermission === 'function') {
       const permission = await motionEvent.requestPermission();
       if (permission !== 'granted') {
-        this.shakeNotice = 'Shake blocked';
+        this.lastRollSource = 'Shake blocked';
         return;
       }
     }
     window.addEventListener('devicemotion', this.onDeviceMotion);
     this.shakeEnabled = true;
-    this.shakeNotice = 'Shake on';
+    this.lastRollSource = 'Shake on';
   };
 
   private disableShake = (): void => {
     window.removeEventListener('devicemotion', this.onDeviceMotion);
     this.shakeEnabled = false;
-    this.shakeNotice = 'Shake off';
+    this.lastRollSource = 'Shake off';
   };
 
   private onDeviceMotion = (event: DeviceMotionEvent): void => {

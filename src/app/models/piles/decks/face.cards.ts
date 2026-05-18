@@ -62,10 +62,4 @@ export class FaceCards extends Deck<Card<FaceCardStyle>> {
         this.add(buildCard(jokers[color], this.cards.length, this.backImg));
     }
 
-    public removeJoker = (color: FaceCardColor): void => {
-        const card = this.find(jokers[color]);
-        if (card) {
-            this.remove(card);
-        }
-    }
 }

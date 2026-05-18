@@ -1,5 +1,5 @@
-import { AsyncPipe, Location } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { debounceTime, Observable } from 'rxjs';
@@ -8,7 +8,6 @@ import { FooterComponent } from './components/layouts/footer/footer.component';
 import { HeaderComponent } from './components/layouts/header/header.component';
 import { SidebarStateService } from './components/layouts/sidebar-state.service';
 import { SidebarComponent } from './components/layouts/sidebar/sidebar.component';
-import { AppConfig } from './interfaces/app-config.interface';
 import { LoadingService } from './services/loading.service';
 import { PrefsService } from './services/prefs.service';
 
@@ -25,9 +24,7 @@ import { PrefsService } from './services/prefs.service';
     AsyncPipe
   ]
 })
-export class AppComponent implements OnInit {
-  private readonly loc = inject(Location);
-  private readonly cfg = inject(AppConfig);
+export class AppComponent {
   private readonly prefs = inject(PrefsService);
   private readonly loading = inject(LoadingService);
   private readonly route = inject(ActivatedRoute);
@@ -41,21 +38,7 @@ export class AppComponent implements OnInit {
   );
   protected readonly sidebarExpanded = this.sidebarState.expanded;
 
-  ngOnInit(): void {
-    this.loc.onUrlChange((url, state) => {
-      if (this.cfg.env !== 'production') {
-        console.log('route changed:', { url, state });
-      }
-    });
-  }
-
-  protected readonly componentActive = (component: Component): void => {
-    if (this.cfg.env !== 'production') {
-      console.log('component active:', {
-        component: component.constructor.name
-      });
-    }
-
+  protected readonly componentActive = (): void => {
     const rt = this.route.firstChild?.snapshot;
     const layout = rt?.data['layout'] ?? 'default';
     const classes = window.document.body.classList;

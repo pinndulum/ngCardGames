@@ -114,7 +114,10 @@ export const date_parts = (dt?: string | number | Date): [number, number, number
         date?.getDate()
     ];
 };
-export const date_parts_equal = (a?: Date, b?: Date) => date_parts(a).equals(date_parts(b));
+const partsEqual = <T>(a: T[], b: T[]): boolean =>
+    a.length === b.length && a.every((value, index) => value === b[index]);
+
+export const date_parts_equal = (a?: Date, b?: Date) => partsEqual(date_parts(a), date_parts(b));
 export const time_parts = (dt?: string | number | Date): [number, number, number, number] => {
     const date = (isDate(dt) ? new Date(dt ?? 0) : undefined) as Date;
     return [
@@ -124,12 +127,12 @@ export const time_parts = (dt?: string | number | Date): [number, number, number
         date?.getMilliseconds()
     ];
 };
-export const time_parts_equal = (a?: Date, b?: Date) => time_parts(a).equals(time_parts(b));
+export const time_parts_equal = (a?: Date, b?: Date) => partsEqual(time_parts(a), time_parts(b));
 export const datetime_parts = (dt?: Date): [number, number, number, number, number, number, number] => [
     ...date_parts(dt),
     ...time_parts(dt)
 ];
-export const datetime_parts_equal = (a?: Date, b?: Date) => datetime_parts(a).equals(datetime_parts(b));
+export const datetime_parts_equal = (a?: Date, b?: Date) => partsEqual(datetime_parts(a), datetime_parts(b));
 
 export const addHours = (date: Date, hours: number, minutes?: number, seconds?: number, ms?: number): Date => {
     const result = new Date(date);
@@ -191,8 +194,8 @@ export const normalize = (str: string) => {
 export const asYYYYMMDD = (date: Date, sep?: string) => {
     const d = new Date(date);
     const year = d.getFullYear();
-    const month = (d.getMonth() + 1).padZero(2);
-    const day = d.getDate().padZero(2);
+    const month = (d.getMonth() + 1).toString().padStart(2, '0');
+    const day = d.getDate().toString().padStart(2, '0');
     return [year, month, day].join(sep || '-');
 };
 
