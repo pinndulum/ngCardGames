@@ -1,12 +1,10 @@
 import { ndx_sig_of } from '../app/interfaces/index-signature-of-t.interface';
 
-export type DialogAction = string | (() => void);
-
 export class DialogModel {
     public readonly opts?: {
         iframe?: { src: string; title: string };
         image?: { src: string; alt: string };
-        buttons?: { title: string; action?: DialogAction }[];
+        buttons?: { title: string; action?: string }[];
         panelClass?: string | string[];
         width?: string;
         maxHeight?: string;

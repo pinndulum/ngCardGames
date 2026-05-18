@@ -1,1 +1,0 @@
-import{a as s,d}from"./chunk-3R5QK4EU.js";var c,m,r=d(()=>{"use strict";c=(o,e)=>({deckId:e.ids.deckId,style:s({},e.style),pile:o}),m=(o,...e)=>({moves:(e||[]).map(t=>c(o,t))})});export{c as a,m as b,r as c};
