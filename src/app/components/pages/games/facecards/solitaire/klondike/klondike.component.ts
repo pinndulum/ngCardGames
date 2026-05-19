@@ -61,8 +61,8 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
   ];
   public readonly dragging: ICard[] = [];
 
-  ngOnInit(): void {
-    this.startGame(this.routeSeed());
+  async ngOnInit(): Promise<void> {
+    await this.startGame(this.routeSeed());
   }
 
   public get gameSeedLabel(): string {
@@ -127,7 +127,7 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
     return card.style.color !== placeon.style.color && card.style.name === placeon.style.name - 1;
   }
 
-  private moveCard = (card: FaceCard, to_pile: IPile): void => {
+  private moveCard = async (card: FaceCard, to_pile: IPile): Promise<void> => {
     if (!card || !to_pile) {
       return;
     }
@@ -149,7 +149,7 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
         this.history.records.push(history);
       }
     }
-    this.checkWin();
+    await this.checkWin();
   }
 
   private checkWin = async (): Promise<void> => {
@@ -167,7 +167,7 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
     });
     if (result === 'new-game') {
       this.history.records.splice(0);
-      this.startGame();
+      await this.startGame();
     }
   }
 
@@ -193,26 +193,22 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
     }
   }
 
-  private isConfirmYes = (result: string | undefined): boolean =>
-    typeof result === 'string' && result.toLowerCase() === 'yes';
-
-  private askRestart = async (seed?: string): Promise<void> => {
-    const result = await this.alert.showDialog({
-      title: 'Are you sure?',
-      message: 'Are you sure you would like to start a new game?',
-      opts: { buttons: [{ title: 'Yes', action: 'yes' }, { title: 'No', action: 'no' }] }
-    });
-    if (this.isConfirmYes(result)) {
+  private requestGame = async (seed?: string): Promise<void> => {
+    let deal = true;
+    if (this.history.records.length) {
+      const message = seed ? 're-start this game?' : 'start a new game?';
+      const result = await this.alert.showDialog({
+        title: 'Are you sure?',
+        message: `Are you sure you would like to ${message}`,
+        opts: { buttons: [{ title: 'Yes', action: 'yes' }, { title: 'No', action: 'no' }] }
+      });
+      if (result !== 'yes') {
+        deal = false;
+      }
+    }
+    if (deal) {
       this.dealGame(seed);
     }
-  }
-
-  private requestGame = (seed?: string): void => {
-    if (this.history.records.length) {
-      this.askRestart(seed);
-      return;
-    }
-    this.dealGame(seed);
   }
 
   private dealGame = (seed?: string): void => {
@@ -238,8 +234,8 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
     this.cdr.detectChanges();
   }
 
-  public startGame = (seed?: string): void => {
-    this.requestGame(seed);
+  public startGame = async (seed?: string): Promise<void> => {
+    await this.requestGame(seed);
   }
 
   private placeCard = (card: FaceCard, pile: IPile, index?: number): void => {
@@ -296,12 +292,12 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
     this.placeCard(cover, cardPile, cardIndex);
   }
 
-  public replayGame = (): void => {
+  public replayGame = async (): Promise<void> => {
     const seed = this.gameSeed;
     if (!seed) {
       return;
     }
-    this.requestGame(seed);
+    await this.requestGame(seed);
   }
 
   public setDrawCount = (count: 1 | 3): void => {
@@ -465,22 +461,23 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
     return card?.style.state === CardState.Up;
   }
 
-  public dblClick = (card: FaceCard) => {
-    if (!this.canMove(card)) {
-      return;
+    public dblClick = async (card: FaceCard): Promise<void> => {
+        if (!this.canMove(card)) {
+            return;
+        }
+        for (const pile of [...this.foundations, ...this.tableaus]) {
+            let candrop: (card: FaceCard, pile: FaceCard[]) => boolean = () => false;
+            if (pile instanceof Foundation) {
+                candrop = this.canFoundationDrop;
+            } else if (pile instanceof Tableau) {
+                candrop = this.canTableauDrop;
+            }
+            if (candrop(card, pile.cards)) {
+                await this.moveCard(card, pile);
+                return;
+            }
+        }
     }
-    for (const pile of [...this.foundations, ...this.tableaus]) {
-      let candrop: (card: FaceCard, pile: FaceCard[]) => boolean = () => false;
-      if (pile instanceof Foundation) {
-        candrop = this.canFoundationDrop;
-      } else if (pile instanceof Tableau) {
-        candrop = this.canTableauDrop;
-      }
-      if (candrop(card, pile.cards)) {
-        return this.moveCard(card, pile);
-      }
-    }
-  }
 
   public canSort = (index: number, drag: CdkDrag<FaceCard>, drop: CdkDropList<FaceCard[]>): boolean => {
     const card = drag.data;
@@ -512,7 +509,7 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
     }
   }
 
-  public onDrop = (event: CdkDragDrop<FaceCard[]>) => {
+  public onDrop = async (event: CdkDragDrop<FaceCard[]>): Promise<void> => {
     if (event.previousContainer === event.container) {
       event.item.reset();
     } else {
@@ -526,7 +523,7 @@ export class KlondikeComponent<FaceCard extends Card<FaceCardStyle>> implements 
           const ndx = Number(groups['ndx']);
           const pile = type && Number.isInteger(ndx) ? this.findDropPile(type, ndx) : undefined;
           if (pile) {
-            this.moveCard(event.item.data, pile);
+            await this.moveCard(event.item.data, pile);
           }
         }  
       }

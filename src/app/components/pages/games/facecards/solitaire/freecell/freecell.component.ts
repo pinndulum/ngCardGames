@@ -58,8 +58,8 @@ export class FreeCellComponent<FaceCard extends Card<FaceCardStyle>> implements 
   ];
   public readonly dragging: FaceCard[] = [];
 
-  ngOnInit(): void {
-    this.startGame(this.routeSeed());
+  async ngOnInit(): Promise<void> {
+    await this.startGame(this.routeSeed());
   }
 
   public get gameSeedLabel(): string {
@@ -228,7 +228,7 @@ export class FreeCellComponent<FaceCard extends Card<FaceCardStyle>> implements 
     return this.tableaus[ndx];
   }
 
-  private moveCard = (card: FaceCard, toPile: IPile): void => {
+  private moveCard = async (card: FaceCard, toPile: IPile): Promise<void> => {
     if (!this.canMoveToPile(card, toPile)) {
       return;
     }
@@ -245,7 +245,7 @@ export class FreeCellComponent<FaceCard extends Card<FaceCardStyle>> implements 
     fromPile.move(toPile, ndx);
     this.history.records.push(history);
     this.clearSelection();
-    this.checkWin();
+    await this.checkWin();
   }
 
   private checkWin = async (): Promise<void> => {
@@ -261,30 +261,26 @@ export class FreeCellComponent<FaceCard extends Card<FaceCardStyle>> implements 
     });
     if (result === 'new-game') {
         this.history.records.splice(0);
-        this.startGame();
+        await this.startGame();
     }
   }
 
-  private isConfirmYes = (result: string | undefined): boolean =>
-    typeof result === 'string' && result.toLowerCase() === 'yes';
-
-  private askRestart = async (seed?: string): Promise<void> => {
-    const result = await this.alert.showDialog({
-      title: 'Are you sure?',
-      message: 'Are you sure you would like to start a new game?',
-      opts: { buttons: [{ title: 'Yes', action: 'yes' }, { title: 'No', action: 'no' }] }
-    });
-    if (this.isConfirmYes(result)) {
-        this.dealGame(seed);
-    }
-  }
-
-  private requestGame = (seed?: string): void => {
+  private requestGame = async (seed?: string): Promise<void> => {
+    let deal = true;
     if (this.history.records.length) {
-      this.askRestart(seed);
-      return;
+      const message = seed ? 're-start this game?' : 'start a new game?';
+      const result = await this.alert.showDialog({
+        title: 'Are you sure?',
+        message: `Are you sure you would like to ${message}`,
+        opts: { buttons: [{ title: 'Yes', action: 'yes' }, { title: 'No', action: 'no' }] }
+      });
+      if (result !== 'yes') {
+        deal = false;
+      }
     }
-    this.dealGame(seed);
+    if (deal) {
+      this.dealGame(seed);
+    }
   }
 
   private dealGame = (seed?: string): void => {
@@ -325,16 +321,16 @@ export class FreeCellComponent<FaceCard extends Card<FaceCardStyle>> implements 
     return candidates.find((card): card is FaceCard => !!card && !!this.findFoundationForCard(card));
   }
 
-  public startGame = (seed?: string): void => {
-    this.requestGame(seed);
+  public startGame = async (seed?: string): Promise<void> => {
+    await this.requestGame(seed);
   }
 
-  public replayGame = (): void => {
+  public replayGame = async (): Promise<void> => {
     const seed = this.gameSeed;
     if (!seed) {
       return;
     }
-    this.requestGame(seed);
+    await this.requestGame(seed);
   }
 
   public undo = (): void => {
@@ -390,22 +386,22 @@ export class FreeCellComponent<FaceCard extends Card<FaceCardStyle>> implements 
   public isPileTarget = (pile: IPile): boolean =>
     !!this.selectedCard && this.canMoveToPile(this.selectedCard, pile);
 
-  public onCardClick = (event: MouseEvent, card: FaceCard): void => {
+  public onCardClick = async (event: MouseEvent, card: FaceCard): Promise<void> => {
     event.stopPropagation();
     if (this.selectedCard && this.selectedCard !== card) {
       const pile = card.getPile();
       if (pile && this.topCard(pile) === card && this.canMoveToPile(this.selectedCard, pile)) {
-        this.moveCard(this.selectedCard, pile);
+        await this.moveCard(this.selectedCard, pile);
         return;
       }
     }
     this.selectCard(card);
   }
 
-  public onPileClick = (event: MouseEvent, pile: IPile): void => {
+  public onPileClick = async (event: MouseEvent, pile: IPile): Promise<void> => {
     event.stopPropagation();
     if (this.selectedCard && this.canMoveToPile(this.selectedCard, pile)) {
-      this.moveCard(this.selectedCard, pile);
+      await this.moveCard(this.selectedCard, pile);
       return;
     }
     if (pile.cards.length === 0) {
@@ -413,19 +409,19 @@ export class FreeCellComponent<FaceCard extends Card<FaceCardStyle>> implements 
     }
   }
 
-  public autoMove = (): void => {
+  public autoMove = async (): Promise<void> => {
     const card = this.findAutoFoundationMove();
     const foundation = this.findFoundationForCard(card);
     if (!card || !foundation) {
       return;
     }
-    this.moveCard(card, foundation);
+    await this.moveCard(card, foundation);
   }
 
-  public dblClick = (card: FaceCard): void => {
+  public dblClick = async (card: FaceCard): Promise<void> => {
     const foundation = this.findFoundationForCard(card);
     if (foundation) {
-      this.moveCard(card, foundation);
+      await this.moveCard(card, foundation);
     }
   }
 
@@ -456,7 +452,7 @@ export class FreeCellComponent<FaceCard extends Card<FaceCardStyle>> implements 
     this.dragging.splice(0, this.dragging.length, ...dragging);
   }
 
-  public onDrop = (event: CdkDragDrop<FaceCard[]>): void => {
+  public onDrop = async (event: CdkDragDrop<FaceCard[]>): Promise<void> => {
     if (event.previousContainer === event.container) {
       event.item.reset();
       this.dragging.splice(0);
@@ -469,7 +465,7 @@ export class FreeCellComponent<FaceCard extends Card<FaceCardStyle>> implements 
     const ndx = Number(groups?.['ndx']);
     const pile = type && Number.isInteger(ndx) ? this.findDropPile(type, ndx) : undefined;
     if (pile && this.canMoveToPile(event.item.data, pile)) {
-      this.moveCard(event.item.data, pile);
+      await this.moveCard(event.item.data, pile);
     } else {
       event.item.reset();
     }

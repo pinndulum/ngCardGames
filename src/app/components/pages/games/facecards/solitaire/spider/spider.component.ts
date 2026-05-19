@@ -57,8 +57,8 @@ export class SpiderComponent<FaceCard extends Card<FaceCardStyle>> implements On
   ];
   public readonly dragging: FaceCard[] = [];
 
-  ngOnInit(): void {
-    this.startGame(this.routeSeed());
+  async ngOnInit(): Promise<void> {
+    await this.startGame(this.routeSeed());
   }
 
   public get gameSeedLabel(): string {
@@ -234,30 +234,26 @@ export class SpiderComponent<FaceCard extends Card<FaceCardStyle>> implements On
     });
     if (result === 'new-game') {
       this.history.records.splice(0);
-      this.startGame();
+      await this.startGame();
     }
   }
 
-  private isConfirmYes = (result: string | undefined): boolean =>
-    typeof result === 'string' && result.toLowerCase() === 'yes';
-
-  private askRestart = async (seed?: string): Promise<void> => {
-    const result = await this.alert.showDialog({
-      title: 'Are you sure?',
-      message: 'Are you sure you would like to start a new game?',
-      opts: { buttons: [{ title: 'Yes', action: 'yes' }, { title: 'No', action: 'no' }] }
-    });
-    if (!this.isConfirmYes(result)) {
+  private requestGame = async (seed?: string): Promise<void> => {
+    let deal = true;
+    if (this.history.records.length) {
+      const message = seed ? 're-start this game?' : 'start a new game?';
+      const result = await this.alert.showDialog({
+        title: 'Are you sure?',
+        message: `Are you sure you would like to ${message}`,
+        opts: { buttons: [{ title: 'Yes', action: 'yes' }, { title: 'No', action: 'no' }] }
+      });
+      if (result !== 'yes') {
+        deal = false;
+      }
+    }
+    if (deal) {
       this.dealGame(seed);
     }
-  }
-
-  private requestGame = (seed?: string): void => {
-    if (this.history.records.length) {
-      this.askRestart(seed);
-      return;
-    }
-    this.dealGame(seed);
   }
 
   private dealGame = (seed?: string): void => {
@@ -278,7 +274,7 @@ export class SpiderComponent<FaceCard extends Card<FaceCardStyle>> implements On
     this.cdr.detectChanges();
   }
 
-  private moveCard = (card: FaceCard, toPile: IPile): void => {
+  private moveCard = async (card: FaceCard, toPile: IPile): Promise<void> => {
     if (!this.canMoveToPile(card, toPile)) {
       return;
     }
@@ -296,7 +292,7 @@ export class SpiderComponent<FaceCard extends Card<FaceCardStyle>> implements On
     this.completeRuns();
     this.history.records.push(this.historyRecord(snapshot));
     this.clearSelection();
-    this.checkWin();
+    await this.checkWin();
   }
 
   private findPileByCards = (cards: FaceCard[]): IPile | undefined =>
@@ -305,16 +301,16 @@ export class SpiderComponent<FaceCard extends Card<FaceCardStyle>> implements On
   private findDropPile = (ndx: number): IPile | undefined =>
     this.tableaus[ndx];
 
-  public startGame = (seed?: string): void => {
-    this.requestGame(seed);
+  public startGame = async (seed?: string): Promise<void> => {
+    await this.requestGame(seed);
   }
 
-  public replayGame = (): void => {
+  public replayGame = async (): Promise<void> => {
     const seed = this.gameSeed;
     if (!seed) {
       return;
     }
-    this.requestGame(seed);
+    await this.requestGame(seed);
   }
 
   public undo = (): void => {
@@ -350,22 +346,22 @@ export class SpiderComponent<FaceCard extends Card<FaceCardStyle>> implements On
     this.selectedCard = this.canDrag(card) ? card : undefined;
   }
 
-  public onCardClick = (event: MouseEvent, card: FaceCard): void => {
+  public onCardClick = async (event: MouseEvent, card: FaceCard): Promise<void> => {
     event.stopPropagation();
     if (this.selectedCard && this.selectedCard !== card) {
       const pile = card.getPile();
       if (pile && this.topCard(pile) === card && this.canMoveToPile(this.selectedCard, pile)) {
-        this.moveCard(this.selectedCard, pile);
+        await this.moveCard(this.selectedCard, pile);
         return;
       }
     }
     this.selectCard(card);
   }
 
-  public onPileClick = (event: MouseEvent, pile: IPile): void => {
+  public onPileClick = async (event: MouseEvent, pile: IPile): Promise<void> => {
     event.stopPropagation();
     if (this.selectedCard && this.canMoveToPile(this.selectedCard, pile)) {
-      this.moveCard(this.selectedCard, pile);
+      await this.moveCard(this.selectedCard, pile);
       return;
     }
     if (pile.cards.length === 0) {
@@ -373,7 +369,7 @@ export class SpiderComponent<FaceCard extends Card<FaceCardStyle>> implements On
     }
   }
 
-  public dealStock = (): void => {
+  public dealStock = async (): Promise<void> => {
     if (!this.canDeal) {
       return;
     }
@@ -385,7 +381,7 @@ export class SpiderComponent<FaceCard extends Card<FaceCardStyle>> implements On
     this.completeRuns();
     this.history.records.push(this.historyRecord(snapshot));
     this.clearSelection();
-    this.checkWin();
+    await this.checkWin();
   }
 
   public canSort = (index: number, drag: CdkDrag<FaceCard>, drop: CdkDropList<FaceCard[]>): boolean => {
@@ -405,7 +401,7 @@ export class SpiderComponent<FaceCard extends Card<FaceCardStyle>> implements On
     this.dragging.splice(0, this.dragging.length, ...dragging);
   }
 
-  public onDrop = (event: CdkDragDrop<FaceCard[]>): void => {
+  public onDrop = async (event: CdkDragDrop<FaceCard[]>): Promise<void> => {
     if (event.previousContainer === event.container) {
       event.item.reset();
       this.dragging.splice(0);
@@ -416,7 +412,7 @@ export class SpiderComponent<FaceCard extends Card<FaceCardStyle>> implements On
     const ndx = Number(match?.groups?.['ndx']);
     const pile = Number.isInteger(ndx) ? this.findDropPile(ndx) : undefined;
     if (pile && this.canMoveToPile(event.item.data, pile)) {
-      this.moveCard(event.item.data, pile);
+      await this.moveCard(event.item.data, pile);
     } else {
       event.item.reset();
     }
