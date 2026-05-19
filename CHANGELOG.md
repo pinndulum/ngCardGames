@@ -2,6 +2,13 @@
 
 All notable changes to JM Card Games are documented here.
 
+## 1.4.0 - 2026-05-19
+
+### Fixed
+
+- Fixed Klondike, FreeCell, and Spider card moves so win checks wait for async dialog and new-game handling before continuing.
+- Fixed solitaire restart and replay confirmations to honor the selected dialog action consistently, including Spider no longer dealing when restart is declined.
+
 ## 1.3.0 - 2026-05-18
 
 ### Added
